@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Acceso al Sistema - GeoPortal</title>
+<style>
+:root{--primary:#0073aa;--primary-dark:#005a87;--bg:#f0f0f1;--card:#fff;--text:#3c434a;--border:#c3c4c7;--error:#d63638;--success:#00a32a}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Oxygen,Ubuntu,sans-serif;background:var(--bg);display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;color:var(--text)}
+.login-box{background:var(--card);padding:2rem;border-radius:8px;box-shadow:0 1px 3px rgba(0,0,0,.13);width:100%;max-width:380px}
+.logo{text-align:center;margin-bottom:1.5rem}
+.logo h1{font-size:1.4rem;color:var(--primary);margin-bottom:.25rem}
+.logo p{font-size:.85rem;color:#72777c}
+.field{margin-bottom:1rem}
+.field label{display:block;font-size:.85rem;font-weight:600;margin-bottom:.3rem;color:var(--text)}
+.field input{width:100%;padding:.55rem .7rem;border:1px solid var(--border);border-radius:4px;font-size:.95rem;color:var(--text);background:#fff}
+.field input:focus{outline:none;border-color:var(--primary);box-shadow:0 0 0 1px var(--primary)}
+.btn{width:100%;padding:.65rem;background:var(--primary);color:#fff;border:none;border-radius:4px;font-size:.95rem;font-weight:600;cursor:pointer;transition:background .2s}
+.btn:hover{background:var(--primary-dark)}
+#msg{color:var(--error);font-size:.85rem;margin-top:.75rem;text-align:center;min-height:1.2em}
+
+.modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:999;align-items:center;justify-content:center}
+.modal-overlay.show{display:flex}
+.modal{background:#fff;border-radius:8px;width:95%;max-width:560px;max-height:85vh;display:flex;flex-direction:column;box-shadow:0 8px 32px rgba(0,0,0,.25)}
+.modal h2{padding:1.2rem 1.5rem;border-bottom:1px solid #ddd;font-size:1.1rem;color:var(--primary)}
+.modal-body{padding:1.5rem;overflow-y:auto;font-size:.9rem;line-height:1.6}
+.modal-body ol{padding-left:1.2rem}
+.modal-body li{margin-bottom:.8rem}
+.modal-footer{padding:1rem 1.5rem;border-top:1px solid #ddd;display:flex;gap:.8rem;justify-content:flex-end}
+.btn-accept{padding:.5rem 1.2rem;background:var(--success);color:#fff;border:none;border-radius:4px;font-weight:600;cursor:pointer}
+.btn-decline{padding:.5rem 1.2rem;background:#ddd;color:var(--text);border:none;border-radius:4px;cursor:pointer}
+</style>
+</head>
+<body>
+
+<div class="login-box">
+  <div class="logo">
+    <h1>GeoPortal</h1>
+    <p>Sistema de Información Geográfica</p>
+  </div>
+  <form id="f">
+    <div class="field">
+      <label>Usuario</label>
+      <input name="username" required autocomplete="username">
+    </div>
+    <div class="field">
+      <label>Contraseña</label>
+      <input name="password" type="password" required autocomplete="current-password">
+    </div>
+    <button class="btn" type="submit">Iniciar sesión</button>
+    <p id="msg"></p>
+  </form>
+</div>
+
+<div class="modal-overlay" id="termsModal">
+  <div class="modal">
+    <h2>Acuerdo de Confidencialidad</h2>
+    <div class="modal-body">
+      <p style="margin-bottom:1rem;font-weight:600">Antes de continuar, debe leer y aceptar los siguientes términos:</p>
+      <ol>
+        <li><strong>Uso Limitado de la Información:</strong> El usuario sólo podrá acceder y utilizar los datos digitales para los fines relacionados con sus funciones laborales, mismas que se desarrollarán de lunes a viernes en un horario de 8:00 a 17:00 hr y sábado de 8:00 a 12:00 hr. quedando prohibido cualquier otro uso sin la autorización expresa y por escrito por parte de las Autoridades Municipales.</li>
+        <li><strong>No Divulgación de Información:</strong> El usuario no podrá compartir, divulgar o difundir la información o datos del Geoportal a terceros no autorizados en ninguna circunstancia.</li>
+        <li><strong>Protección de Credenciales de Acceso:</strong> El usuario debe mantener sus credenciales de acceso (nombre de usuario y contraseña) en estricto secreto, y no permitir que otras personas utilicen su cuenta.</li>
+        <li><strong>Seguridad de la Información:</strong> El usuario deberá adoptar todas las medidas necesarias para proteger la información y documentos obtenidos del Geoportal de cualquier uso indebido, acceso no autorizado o pérdida.</li>
+        <li><strong>Cumplimiento de Normativa Nacional:</strong> El usuario se compromete a cumplir con todas las leyes nacionales vigentes relacionadas con la protección de datos y la confidencialidad de la información gubernamental, incluyendo la Ley de Transparencia y Acceso a la Información Pública (Decreto 170-2006), la cual regula el manejo y protección de datos confidenciales de la administración pública.</li>
+        <li><strong>Duración de la Confidencialidad:</strong> Este acuerdo será válido mientras exista una autorización expresa por parte del Jefe Inmediato Superior.</li>
+      </ol>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-decline" onclick="declineTerms()">Rechazar</button>
+      <button class="btn-accept" onclick="acceptTerms()">Acepto los términos</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const WORKER = 'https://nextgis-gate.geomdsps.workers.dev';
+let pendingToken = null;
+let pendingData = null;
+
+document.getElementById('f').onsubmit = async e => {
+  e.preventDefault();
+  const fd = new FormData(e.target);
+  try {
+    const r = await fetch(WORKER+'/login', {
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({ username: fd.get('username'), password: fd.get('password') })
+    });
+    if (!r.ok) { document.getElementById('msg').textContent = 'Usuario o contraseña incorrectos'; return; }
+    const data = await r.json();
+    if (!data.acceptedTerms) {
+      pendingToken = data.token;
+      pendingData = data;
+      document.getElementById('termsModal').classList.add('show');
+      return;
+    }
+    completeLogin(data);
+  } catch(err) {
+    document.getElementById('msg').textContent = 'Error de conexión con el servidor';
+  }
+};
+
+async function acceptTerms() {
+  const r = await fetch(WORKER+'/accept-terms', {
+    method:'POST', headers:{ 'Authorization':'Bearer '+pendingToken, 'Content-Type':'application/json' }
+  });
+  if (r.ok) {
+    const { token } = await r.json();
+    pendingData.token = token;
+    pendingData.acceptedTerms = true;
+    document.getElementById('termsModal').classList.remove('show');
+    completeLogin(pendingData);
+  }
+}
+
+function declineTerms() {
+  document.getElementById('termsModal').classList.remove('show');
+  document.getElementById('msg').textContent = 'Debe aceptar los términos para continuar';
+  pendingToken = null; pendingData = null;
+}
+
+function completeLogin(data) {
+  sessionStorage.setItem('tk', data.token);
+  sessionStorage.setItem('role', data.role);
+  sessionStorage.setItem('fullName', data.fullName || '');
+  sessionStorage.setItem('mapAuth', data.mapAuthorized);
+  location.href = data.role === 'admin' ? 'admin.html' : 'map.html';
+}
+</script>
+</body>
+</html>

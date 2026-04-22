@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>GeoPortal - Visor de Mapa</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body,html{height:100%;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif}
+header{background:#1d2327;color:#fff;padding:0 1rem;height:48px;display:flex;align-items:center;justify-content:space-between;box-shadow:0 1px 3px rgba(0,0,0,.2)}
+header .left{display:flex;align-items:center;gap:.8rem}
+header .left span.icon{background:#0073aa;width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:.75rem;font-weight:700}
+header h1{font-size:.95rem;font-weight:500}
+header .right{display:flex;align-items:center;gap:1rem;font-size:.85rem}
+.user-name{color:#c3c4c7}
+.btn-logout{background:#d63638;color:#fff;border:none;padding:.35rem .8rem;border-radius:3px;cursor:pointer;font-size:.8rem}
+.btn-logout:hover{background:#b32d2f}
+.no-access{display:flex;align-items:center;justify-content:center;height:calc(100% - 48px);text-align:center;padding:2rem}
+.no-access div{max-width:400px}
+.no-access h2{color:#d63638;margin-bottom:1rem}
+.no-access p{color:#50575e;line-height:1.5}
+iframe{width:100%;height:calc(100% - 48px);border:0}
+</style>
+</head>
+<body>
+<header>
+  <div class="left">
+    <span class="icon">GP</span>
+    <h1>GeoPortal — Visor de Mapa</h1>
+  </div>
+  <div class="right">
+    <span class="user-name" id="userName"></span>
+    <button class="btn-logout" onclick="sessionStorage.clear();location='index.html'">Cerrar sesión</button>
+  </div>
+</header>
+
+<div class="no-access" id="noAccess" style="display:none">
+  <div>
+    <h2>Acceso al mapa no autorizado</h2>
+    <p>Su cuenta está activa pero no tiene autorización para visualizar el mapa. Contacte al administrador del sistema para solicitar acceso.</p>
+  </div>
+</div>
+
+<iframe id="mapFrame" style="display:none"></iframe>
+
+<script>
+const WORKER = 'https://nextgis-gate.geomdsps.workers.dev';
+const tk = sessionStorage.getItem('tk');
+if (!tk) location.href = 'index.html';
+
+document.getElementById('userName').textContent = sessionStorage.getItem('fullName') || '';
+
+const mapAuth = sessionStorage.getItem('mapAuth');
+if (mapAuth === 'true' || mapAuth === true) {
+  document.getElementById('mapFrame').style.display = 'block';
+  document.getElementById('mapFrame').src = `${WORKER}/map?t=${tk}`;
+} else {
+  document.getElementById('noAccess').style.display = 'flex';
+}
+</script>
+</body>
+</html>

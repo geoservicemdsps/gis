@@ -1,0 +1,672 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>GeoPortal — Panel de Administración</title>
+<style>
+:root{--sidebar:#1d2327;--sidebar-hover:#2c3338;--sidebar-active:#2271b1;--topbar:#1d2327;--bg:#f0f0f1;--card:#fff;--primary:#2271b1;--primary-hover:#135e96;--text:#1d2327;--text-sec:#50575e;--border:#c3c4c7;--success:#00a32a;--error:#d63638;--warning:#dba617}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;background:var(--bg);color:var(--text);font-size:14px}
+
+.topbar{position:fixed;top:0;left:0;right:0;height:32px;background:var(--topbar);z-index:100;display:flex;align-items:center;justify-content:space-between;padding:0 1rem;font-size:13px;color:#c3c4c7}
+.topbar a{color:#c3c4c7;text-decoration:none;cursor:pointer}.topbar a:hover{color:#72aee6}
+
+.sidebar{position:fixed;top:32px;left:0;bottom:0;width:160px;background:var(--sidebar);overflow-y:auto;z-index:90}
+.sidebar .brand{padding:12px 12px 8px;color:#fff;font-size:15px;font-weight:700;border-bottom:1px solid #3c434a}
+.sidebar ul{list-style:none}
+.sidebar li a{display:flex;align-items:center;gap:8px;padding:8px 12px;color:#c3c4c7;text-decoration:none;font-size:13px;transition:background .15s}
+.sidebar li a:hover{background:var(--sidebar-hover);color:#fff}
+.sidebar li a.active{background:var(--sidebar-active);color:#fff}
+.sidebar li a .ico{width:20px;text-align:center;font-size:15px}
+
+.main{margin-left:160px;margin-top:32px;padding:20px}
+.page-title{font-size:1.3rem;font-weight:400;margin-bottom:16px;color:var(--text)}
+.page-title span{font-weight:300;font-size:.9rem;color:var(--text-sec)}
+
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px;margin-bottom:20px}
+.stat{background:var(--card);border:1px solid var(--border);border-radius:4px;padding:16px;text-align:center}
+.stat .num{font-size:1.8rem;font-weight:600;color:var(--primary)}
+.stat .lbl{font-size:.8rem;color:var(--text-sec);margin-top:4px}
+
+.charts-row{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:20px}
+@media(max-width:900px){.charts-row{grid-template-columns:1fr}}
+
+.panel{background:var(--card);border:1px solid var(--border);border-radius:4px;margin-bottom:20px}
+.panel-header{padding:10px 16px;border-bottom:1px solid var(--border);font-weight:600;font-size:.9rem;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px}
+.panel-body{padding:16px;overflow-x:auto}
+.chart-container{position:relative;width:100%;max-height:340px}
+
+table{width:100%;border-collapse:collapse;font-size:.85rem}
+th{background:#f6f7f7;text-align:left;padding:8px 10px;border-bottom:2px solid var(--border);font-weight:600;white-space:nowrap}
+td{padding:7px 10px;border-bottom:1px solid #e2e4e7;vertical-align:middle}
+tr:hover td{background:#f6f7f7}
+
+.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.field{display:flex;flex-direction:column;gap:3px}
+.field label{font-size:.8rem;font-weight:600;color:var(--text-sec)}
+.field input,.field select{padding:6px 8px;border:1px solid var(--border);border-radius:3px;font-size:.9rem}
+.field input:focus,.field select:focus{outline:none;border-color:var(--primary);box-shadow:0 0 0 1px var(--primary)}
+.field-full{grid-column:1/-1}
+
+.btn{padding:6px 14px;border:none;border-radius:3px;font-size:.85rem;font-weight:600;cursor:pointer;transition:background .15s}
+.btn-primary{background:var(--primary);color:#fff}.btn-primary:hover{background:var(--primary-hover)}
+.btn-danger{background:var(--error);color:#fff}.btn-danger:hover{background:#b32d2f}
+.btn-success{background:var(--success);color:#fff}.btn-success:hover{background:#007a1e}
+.btn-sm{padding:3px 8px;font-size:.78rem}
+.btn-outline{background:#fff;color:var(--text);border:1px solid var(--border)}.btn-outline:hover{background:#f6f7f7}
+
+.toggle{position:relative;width:40px;height:22px;cursor:pointer;display:inline-block;vertical-align:middle}
+.toggle input{display:none}
+.toggle .slider{position:absolute;inset:0;background:#d63638;border-radius:22px;transition:.25s}
+.toggle input:checked+.slider{background:#00a32a}
+.toggle .slider::before{content:'';position:absolute;width:18px;height:18px;border-radius:50%;background:#fff;top:2px;left:2px;transition:.25s;box-shadow:0 1px 3px rgba(0,0,0,.2)}
+.toggle input:checked+.slider::before{left:20px}
+
+.section{display:none}.section.active{display:block}
+
+.toast{position:fixed;top:40px;right:16px;background:#333;color:#fff;padding:10px 16px;border-radius:4px;font-size:.85rem;z-index:200;display:none}
+.toast.show{display:block}
+
+.pagination{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;font-size:.85rem}
+.pagination .pages{display:flex;gap:4px}
+.pagination .pages button{width:32px;height:30px;border:1px solid var(--border);border-radius:3px;background:#fff;cursor:pointer;font-size:.82rem;color:var(--text)}
+.pagination .pages button.active{background:var(--primary);color:#fff;border-color:var(--primary)}
+.pagination .pages button:hover:not(.active){background:#f6f7f7}
+.pagination .info{color:var(--text-sec)}
+
+.palettes{display:grid;grid-template-columns:repeat(auto-fill,minmax(90px,1fr));gap:8px;margin-top:12px}
+.pal{border:2px solid transparent;border-radius:6px;padding:6px;cursor:pointer;text-align:center;font-size:.7rem;transition:border .15s}
+.pal:hover{border-color:var(--primary)}
+.pal.selected{border-color:var(--primary);box-shadow:0 0 0 2px rgba(34,113,177,.3)}
+.pal-swatch{height:28px;border-radius:3px;margin-bottom:3px}
+
+/* Edit Modal */
+.modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:300;align-items:center;justify-content:center}
+.modal-overlay.show{display:flex}
+.modal{background:#fff;border-radius:8px;width:95%;max-width:600px;max-height:90vh;display:flex;flex-direction:column;box-shadow:0 8px 32px rgba(0,0,0,.25)}
+.modal-head{padding:14px 20px;border-bottom:1px solid #ddd;font-weight:600;font-size:1rem;display:flex;justify-content:space-between;align-items:center}
+.modal-head .close{background:none;border:none;font-size:1.4rem;cursor:pointer;color:#999;line-height:1}
+.modal-body{padding:20px;overflow-y:auto}
+.modal-foot{padding:12px 20px;border-top:1px solid #ddd;display:flex;gap:8px;justify-content:flex-end}
+
+.actions-cell{display:flex;gap:4px;flex-wrap:nowrap}
+
+@media print{
+  .topbar,.sidebar,.no-print{display:none!important}
+  .main{margin-left:0!important;margin-top:0!important;padding:10px!important}
+  .panel{break-inside:avoid;border:1px solid #ccc}
+  body{background:#fff!important;font-size:11px}
+  table{font-size:10px}
+  th{background:#eee!important;print-color-adjust:exact;-webkit-print-color-adjust:exact}
+}
+@media(max-width:768px){.sidebar{width:50px}.sidebar .brand,.sidebar li a span:not(.ico){display:none}.sidebar li a{justify-content:center;padding:10px}.main{margin-left:50px}.form-grid{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div>GeoPortal Admin</div>
+  <div>
+    <span id="adminName" style="margin-right:12px"></span>
+    <a onclick="sessionStorage.clear();location='index.html'">Cerrar sesión</a>
+  </div>
+</div>
+
+<nav class="sidebar">
+  <div class="brand">GeoPortal</div>
+  <ul>
+    <li><a href="#" class="active" onclick="showSection('dashboard',this)"><span class="ico">📊</span><span>Dashboard</span></a></li>
+    <li><a href="#" onclick="showSection('users',this)"><span class="ico">👥</span><span>Usuarios</span></a></li>
+    <li><a href="#" onclick="showSection('newuser',this)"><span class="ico">➕</span><span>Crear Usuario</span></a></li>
+    <li><a href="#" onclick="showSection('logs',this)"><span class="ico">📋</span><span>Accesos</span></a></li>
+    <li><a href="#" onclick="showSection('settings',this)"><span class="ico">⚙️</span><span>Ajustes</span></a></li>
+    <li><a href="map.html"><span class="ico">🗺️</span><span>Ver Mapa</span></a></li>
+  </ul>
+</nav>
+
+<div class="toast" id="toast"></div>
+
+<!-- EDIT USER MODAL -->
+<div class="modal-overlay" id="editModal">
+  <div class="modal">
+    <div class="modal-head">
+      <span>Editar Usuario: <strong id="editTitle"></strong></span>
+      <button class="close" onclick="closeEdit()">&times;</button>
+    </div>
+    <div class="modal-body">
+      <input type="hidden" id="ed_username">
+      <div class="form-grid">
+        <div class="field"><label>Nombres y Apellidos</label><input id="ed_name"></div>
+        <div class="field"><label>Número de Identificación</label><input id="ed_id"></div>
+        <div class="field"><label>Unidad de Trabajo</label><input id="ed_unit"></div>
+        <div class="field"><label>Cargo Actual</label><input id="ed_pos"></div>
+        <div class="field"><label>Correo Electrónico</label><input id="ed_email" type="email"></div>
+        <div class="field"><label>Teléfono</label><input id="ed_phone"></div>
+        <div class="field"><label>Rol</label><select id="ed_role"><option value="user">Usuario</option><option value="admin">Administrador</option></select></div>
+        <div class="field"><label>Fecha Firma Acuerdo</label><input id="ed_conf" type="date"></div>
+        <div class="field"><label>Autorización Ver Mapa</label><select id="ed_map"><option value="true">Sí</option><option value="false">No</option></select></div>
+        <div class="field"><label>Estado</label><select id="ed_enabled"><option value="true">Activo</option><option value="false">Inactivo</option></select></div>
+        <div class="field field-full"><label>Nueva Contraseña <span style="font-weight:400;color:#999">(dejar vacío para no cambiar)</span></label><input id="ed_pass" type="password" placeholder="••••••••"></div>
+      </div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn btn-outline" onclick="closeEdit()">Cancelar</button>
+      <button class="btn btn-primary" onclick="saveEdit()">Guardar Cambios</button>
+    </div>
+  </div>
+</div>
+
+<div class="main">
+
+  <!-- DASHBOARD -->
+  <div class="section active" id="sec-dashboard">
+    <h1 class="page-title">Dashboard</h1>
+    <div class="stats">
+      <div class="stat"><div class="num" id="stTotal">0</div><div class="lbl">Total Usuarios</div></div>
+      <div class="stat"><div class="num" id="stActive">0</div><div class="lbl">Activos</div></div>
+      <div class="stat"><div class="num" id="stMap">0</div><div class="lbl">Con Acceso al Mapa</div></div>
+      <div class="stat"><div class="num" id="stLogins">0</div><div class="lbl">Accesos Registrados</div></div>
+    </div>
+    <div class="charts-row">
+      <div class="panel">
+        <div class="panel-header">Top 20 — Usuarios con más inicios de sesión</div>
+        <div class="panel-body"><div class="chart-container"><canvas id="chartLogins"></canvas></div></div>
+      </div>
+      <div class="panel">
+        <div class="panel-header">Usuarios por Unidad de Trabajo</div>
+        <div class="panel-body"><div class="chart-container"><canvas id="chartUnits"></canvas></div></div>
+      </div>
+    </div>
+    <div class="panel">
+      <div class="panel-header">Últimos accesos</div>
+      <div class="panel-body"><table><thead><tr><th>Usuario</th><th>IP</th><th>País</th><th>Ciudad</th><th>Fecha/Hora Local</th></tr></thead><tbody id="dashLogs"></tbody></table></div>
+    </div>
+  </div>
+
+  <!-- USERS LIST -->
+  <div class="section" id="sec-users">
+    <h1 class="page-title">Usuarios <span id="userCount"></span></h1>
+    <div class="panel">
+      <div class="panel-header">
+        <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
+          <span>Listado de usuarios</span>
+          <input type="text" id="searchUser" placeholder="Buscar..." style="padding:4px 8px;border:1px solid #ccc;border-radius:3px;font-size:.85rem">
+        </div>
+        <div class="no-print" style="display:flex;align-items:center;gap:10px">
+          <label style="font-size:.8rem;font-weight:400;color:var(--text-sec)">Mostrar:
+            <select id="pageSize" onchange="changePageSize()" style="padding:3px 6px;border:1px solid #ccc;border-radius:3px;font-size:.82rem">
+              <option value="5">5</option><option value="10" selected>10</option><option value="25">25</option><option value="50">50</option><option value="100">100</option>
+            </select>
+          </label>
+          <button class="btn btn-outline btn-sm" onclick="printUsers()">🖨️ Imprimir</button>
+        </div>
+      </div>
+      <div class="pagination no-print" id="paginationTop" style="padding:8px 16px 0"></div>
+      <div class="panel-body">
+        <table>
+          <thead><tr>
+            <th>Usuario</th><th>Nombre Completo</th><th>Unidad</th><th>Cargo</th><th>Correo</th><th>Rol</th><th>Estado</th><th>Mapa</th><th>Términos</th><th class="no-print">Acciones</th>
+          </tr></thead>
+          <tbody id="userTable"></tbody>
+        </table>
+      </div>
+      <div class="pagination no-print" id="paginationBottom" style="padding:0 16px 12px"></div>
+    </div>
+  </div>
+
+  <!-- NEW USER -->
+  <div class="section" id="sec-newuser">
+    <h1 class="page-title">Crear Nuevo Usuario</h1>
+    <div class="panel">
+      <div class="panel-header">Datos del usuario</div>
+      <div class="panel-body">
+        <div class="form-grid">
+          <div class="field"><label>Nombre de Usuario *</label><input id="nu_user" required></div>
+          <div class="field"><label>Contraseña *</label><input id="nu_pass" type="password" required></div>
+          <div class="field"><label>Nombres y Apellidos *</label><input id="nu_name"></div>
+          <div class="field"><label>Número de Identificación</label><input id="nu_id"></div>
+          <div class="field"><label>Unidad de Trabajo</label><input id="nu_unit"></div>
+          <div class="field"><label>Cargo Actual</label><input id="nu_pos"></div>
+          <div class="field"><label>Correo Electrónico</label><input id="nu_email" type="email"></div>
+          <div class="field"><label>Teléfono</label><input id="nu_phone"></div>
+          <div class="field"><label>Rol</label><select id="nu_role"><option value="user">Usuario</option><option value="admin">Administrador</option></select></div>
+          <div class="field"><label>Fecha Firma Acuerdo Confidencialidad</label><input id="nu_conf" type="date"></div>
+          <div class="field"><label>Autorización Ver Mapa</label><select id="nu_map"><option value="true">Sí</option><option value="false">No</option></select></div>
+        </div>
+        <div style="margin-top:16px;display:flex;gap:8px">
+          <button class="btn btn-primary" onclick="crearUsuario()">Crear Usuario</button>
+          <button class="btn" style="background:#ddd;color:#333" onclick="limpiarFormulario()">Limpiar</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- LOGS -->
+  <div class="section" id="sec-logs">
+    <h1 class="page-title">Registro de Accesos</h1>
+    <div class="panel">
+      <div class="panel-header">Historial de inicios de sesión</div>
+      <div class="panel-body"><table><thead><tr><th>Usuario</th><th>IP</th><th>País</th><th>Ciudad</th><th>Zona Horaria</th><th>Fecha/Hora Local</th><th>Fecha UTC</th></tr></thead><tbody id="logTable"></tbody></table></div>
+    </div>
+  </div>
+
+  <!-- SETTINGS -->
+  <div class="section" id="sec-settings">
+    <h1 class="page-title">Ajustes del Sistema</h1>
+    <div class="panel">
+      <div class="panel-header">URL del Mapa</div>
+      <div class="panel-body">
+        <div class="field field-full">
+          <label>Dirección URL del mapa embebido (NextGIS u otro servicio)</label>
+          <input id="cfg_mapUrl" style="width:100%;max-width:600px" placeholder="https://...">
+        </div>
+        <button class="btn btn-primary" style="margin-top:12px" onclick="saveMapUrl()">Guardar URL</button>
+      </div>
+    </div>
+    <div class="panel">
+      <div class="panel-header">Tema de Color de la Interfaz</div>
+      <div class="panel-body">
+        <p style="font-size:.85rem;color:var(--text-sec);margin-bottom:8px">Seleccione una combinación de colores. Los fondos son siempre claros para mejor legibilidad.</p>
+        <div class="palettes" id="paletteGrid"></div>
+        <button class="btn btn-primary" style="margin-top:16px" onclick="saveTheme()">Aplicar Tema</button>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- Chart.js loaded at end to not block rendering -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.7/chart.umd.min.js"></script>
+<script>
+const W = 'https://nextgis-gate.geomdsps.workers.dev';
+const tk = sessionStorage.getItem('tk');
+if (!tk || sessionStorage.getItem('role') !== 'admin') location.href = 'index.html';
+const H = { 'Authorization':'Bearer '+tk, 'Content-Type':'application/json' };
+
+document.getElementById('adminName').textContent = sessionStorage.getItem('fullName') || 'Admin';
+
+const PALETTES = [
+  {name:'WP Clásico',bg:'#f0f0f1',sidebar:'#1d2327',primary:'#2271b1',accent:'#d63638'},
+  {name:'Océano',bg:'#eef4f8',sidebar:'#1b3a4b',primary:'#006d77',accent:'#e29578'},
+  {name:'Bosque',bg:'#f0f4ef',sidebar:'#2d3a2e',primary:'#386641',accent:'#a7c957'},
+  {name:'Lavanda',bg:'#f5f0fa',sidebar:'#2e1a47',primary:'#7b2cbf',accent:'#c77dff'},
+  {name:'Coral',bg:'#fef0ed',sidebar:'#3d1e1e',primary:'#d62828',accent:'#f77f00'},
+  {name:'Cielo',bg:'#edf5fc',sidebar:'#1a365d',primary:'#2b6cb0',accent:'#63b3ed'},
+  {name:'Arena',bg:'#faf5ef',sidebar:'#44403c',primary:'#92400e',accent:'#d97706'},
+  {name:'Menta',bg:'#effaf6',sidebar:'#1a3a2a',primary:'#059669',accent:'#34d399'},
+  {name:'Rosa',bg:'#fdf0f5',sidebar:'#3d1a2e',primary:'#be185d',accent:'#f472b6'},
+  {name:'Pizarra',bg:'#f1f5f9',sidebar:'#1e293b',primary:'#475569',accent:'#94a3b8'},
+  {name:'Ámbar',bg:'#fefce8',sidebar:'#3f3811',primary:'#a16207',accent:'#facc15'},
+  {name:'Índigo',bg:'#eef2ff',sidebar:'#1e1b4b',primary:'#4338ca',accent:'#818cf8'},
+  {name:'Terracota',bg:'#fef2f0',sidebar:'#431407',primary:'#c2410c',accent:'#fb923c'},
+  {name:'Jade',bg:'#ecfdf5',sidebar:'#064e3b',primary:'#047857',accent:'#6ee7b7'},
+  {name:'Ciruela',bg:'#faf5ff',sidebar:'#3b0764',primary:'#7e22ce',accent:'#c084fc'},
+  {name:'Carbón',bg:'#f4f4f5',sidebar:'#27272a',primary:'#52525b',accent:'#a1a1aa'},
+  {name:'Tomate',bg:'#fff1f2',sidebar:'#4c0519',primary:'#e11d48',accent:'#fb7185'},
+  {name:'Turquesa',bg:'#f0fdfa',sidebar:'#134e4a',primary:'#0d9488',accent:'#5eead4'},
+  {name:'Granate',bg:'#fdf2f8',sidebar:'#500724',primary:'#9d174d',accent:'#f9a8d4'},
+  {name:'Oliva',bg:'#f7fee7',sidebar:'#1a2e05',primary:'#4d7c0f',accent:'#a3e635'},
+  {name:'Zafiro',bg:'#eff6ff',sidebar:'#1e3a5f',primary:'#1d4ed8',accent:'#60a5fa'},
+  {name:'Cobre',bg:'#fdf4ef',sidebar:'#451a03',primary:'#b45309',accent:'#fbbf24'},
+  {name:'Neón Suave',bg:'#f0fdf4',sidebar:'#14532d',primary:'#15803d',accent:'#4ade80'},
+  {name:'Noche Azul',bg:'#f0f4ff',sidebar:'#0f172a',primary:'#3b82f6',accent:'#93c5fd'},
+  {name:'Melocotón',bg:'#fff7ed',sidebar:'#431407',primary:'#ea580c',accent:'#fdba74'},
+  {name:'Violeta',bg:'#f5f3ff',sidebar:'#2e1065',primary:'#6d28d9',accent:'#a78bfa'},
+  {name:'Esmeralda',bg:'#ecfdf5',sidebar:'#022c22',primary:'#059669',accent:'#a7f3d0'},
+  {name:'Arcilla',bg:'#faf5f0',sidebar:'#292524',primary:'#78716c',accent:'#d6d3d1'},
+  {name:'Amanecer',bg:'#fff8f1',sidebar:'#3c1810',primary:'#c2410c',accent:'#fcd34d'},
+  {name:'Glaciar',bg:'#f0f9ff',sidebar:'#0c4a6e',primary:'#0284c7',accent:'#7dd3fc'},
+];
+
+const CHART_COLORS = [
+  '#2271b1','#00a32a','#d63638','#dba617','#3858e9',
+  '#059669','#7b2cbf','#ea580c','#0d9488','#be185d',
+  '#4d7c0f','#b45309','#6d28d9','#0284c7','#9d174d',
+  '#386641','#d62828','#006d77','#4338ca','#c2410c'
+];
+
+let allUsers = [];
+let allLogs = [];
+let currentTheme = 'WP Clásico';
+let currentPage = 1;
+let pageSize = 10;
+let chartLogins = null;
+let chartUnits = null;
+let dataReady = false;
+
+// ============ SECTION NAVIGATION ============
+function showSection(id, el) {
+  document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+  document.getElementById('sec-'+id).classList.add('active');
+  document.querySelectorAll('.sidebar a').forEach(a => a.classList.remove('active'));
+  if (el) el.classList.add('active');
+  // Re-render data when switching sections to ensure visibility
+  if (dataReady) {
+    if (id === 'users') renderUsers();
+    if (id === 'dashboard') { renderStats(); renderCharts(); }
+    if (id === 'logs') renderLogs();
+  }
+}
+
+function toast(msg, dur=2500) {
+  const t = document.getElementById('toast');
+  t.textContent = msg; t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), dur);
+}
+
+// ============ DATA LOADING ============
+async function loadAll() {
+  try {
+    const [uRes, lRes, cRes] = await Promise.all([
+      fetch(W+'/admin/users', {headers:H}),
+      fetch(W+'/admin/logs', {headers:H}),
+      fetch(W+'/admin/config', {headers:H})
+    ]);
+    allUsers = await uRes.json();
+    allLogs = await lRes.json();
+    const config = await cRes.json();
+    document.getElementById('cfg_mapUrl').value = config.mapUrl || '';
+    if (config.theme) { currentTheme = config.theme; applyThemeByName(config.theme); }
+    dataReady = true;
+    renderStats();
+    renderCharts();
+    renderUsers();
+    renderLogs();
+    renderPalettes();
+  } catch(e) {
+    console.error('Error cargando datos:', e);
+    toast('Error al conectar con el servidor');
+  }
+}
+
+// ============ DASHBOARD ============
+function renderStats() {
+  document.getElementById('stTotal').textContent = allUsers.length;
+  document.getElementById('stActive').textContent = allUsers.filter(u=>u.enabled).length;
+  document.getElementById('stMap').textContent = allUsers.filter(u=>u.mapAuthorized).length;
+  document.getElementById('stLogins').textContent = allLogs.length;
+  const recent = allLogs.slice(0,8);
+  document.getElementById('dashLogs').innerHTML = recent.map(l =>
+    `<tr><td>${l.key.split(':')[0]}</td><td>${l.ip}</td><td>${l.country}</td><td>${l.city}</td><td>${l.localTime||l.ts}</td></tr>`
+  ).join('');
+}
+
+function renderCharts() {
+  if (typeof Chart === 'undefined') return; // Chart.js not loaded yet
+
+  // Chart 1: Top 20 by login count
+  const loginCounts = {};
+  allLogs.forEach(l => {
+    const user = l.key.split(':')[0];
+    loginCounts[user] = (loginCounts[user] || 0) + 1;
+  });
+  const sorted = Object.entries(loginCounts).sort((a,b) => b[1]-a[1]).slice(0,20);
+
+  if (chartLogins) chartLogins.destroy();
+  chartLogins = new Chart(document.getElementById('chartLogins').getContext('2d'), {
+    type: 'bar',
+    data: {
+      labels: sorted.map(e => e[0]),
+      datasets: [{
+        label: 'Inicios de sesión',
+        data: sorted.map(e => e[1]),
+        backgroundColor: sorted.map((_, i) => CHART_COLORS[i % CHART_COLORS.length]),
+        borderRadius: 4,
+        barThickness: sorted.length > 10 ? 14 : 24
+      }]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false, indexAxis: 'y',
+      plugins: { legend: { display: false }, tooltip: { callbacks: { label: ctx => `${ctx.parsed.x} acceso(s)` } } },
+      scales: {
+        x: { beginAtZero: true, ticks: { stepSize: 1, font: { size: 11 } }, grid: { color: '#e2e4e7' }, title: { display: true, text: 'Cantidad de accesos', font: { size: 12 } } },
+        y: { ticks: { font: { size: 11 } }, grid: { display: false } }
+      }
+    }
+  });
+
+  // Chart 2: Users by Work Unit
+  const unitCounts = {};
+  allUsers.forEach(u => {
+    const unit = u.workUnit || 'Sin asignar';
+    unitCounts[unit] = (unitCounts[unit] || 0) + 1;
+  });
+  const unitLabels = Object.keys(unitCounts);
+  const unitData = Object.values(unitCounts);
+
+  if (chartUnits) chartUnits.destroy();
+  chartUnits = new Chart(document.getElementById('chartUnits').getContext('2d'), {
+    type: 'doughnut',
+    data: {
+      labels: unitLabels,
+      datasets: [{ data: unitData, backgroundColor: unitLabels.map((_, i) => CHART_COLORS[i % CHART_COLORS.length]), borderWidth: 2, borderColor: '#fff' }]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: {
+        legend: { position: 'bottom', labels: { padding: 12, font: { size: 11 }, usePointStyle: true, pointStyle: 'circle' } },
+        tooltip: { callbacks: { label: ctx => ` ${ctx.label}: ${ctx.parsed} usuario(s)` } }
+      }
+    }
+  });
+}
+
+// ============ USERS TABLE ============
+function getFilteredUsers() {
+  const f = (document.getElementById('searchUser').value || '').toLowerCase();
+  return f ? allUsers.filter(u => (u.username+u.fullName+u.workUnit+u.email+u.position).toLowerCase().includes(f)) : [...allUsers];
+}
+
+function renderUsers() {
+  const filtered = getFilteredUsers();
+  const totalPages = Math.max(1, Math.ceil(filtered.length / pageSize));
+  if (currentPage > totalPages) currentPage = totalPages;
+  const start = (currentPage - 1) * pageSize;
+  const page = filtered.slice(start, start + pageSize);
+
+  document.getElementById('userCount').textContent = `(${filtered.length})`;
+  document.getElementById('userTable').innerHTML = page.map(u => {
+    const uEsc = esc(u.username);
+    return `<tr>
+    <td><strong>${uEsc}</strong></td>
+    <td>${esc(u.fullName)}</td>
+    <td>${esc(u.workUnit)}</td>
+    <td>${esc(u.position)}</td>
+    <td>${esc(u.email)}</td>
+    <td>${u.role==='admin'?'<span style="color:var(--primary);font-weight:600">Admin</span>':'Usuario'}</td>
+    <td><label class="toggle" title="${u.enabled?'Activo':'Inactivo'}"><input type="checkbox" ${u.enabled?'checked':''} onchange="toggleEnabled('${uEsc}')"><span class="slider"></span></label></td>
+    <td><label class="toggle" title="${u.mapAuthorized?'Autorizado':'No autorizado'}"><input type="checkbox" ${u.mapAuthorized?'checked':''} onchange="toggleMap('${uEsc}')"><span class="slider"></span></label></td>
+    <td>${u.acceptedTerms?'✅':'⏳'}</td>
+    <td class="no-print"><div class="actions-cell">
+      <button class="btn btn-success btn-sm" onclick="openEdit('${uEsc}')">Editar</button>
+      ${u.username!=='admin'?'<button class="btn btn-danger btn-sm" onclick="eliminar(\''+uEsc+'\')">Eliminar</button>':''}
+    </div></td>
+  </tr>`;
+  }).join('');
+
+  const ph = buildPagination(filtered.length, totalPages);
+  document.getElementById('paginationTop').innerHTML = ph;
+  document.getElementById('paginationBottom').innerHTML = ph;
+}
+
+function buildPagination(total, totalPages) {
+  if (totalPages <= 1) return `<span class="info">Mostrando ${total} registro(s)</span>`;
+  const start = (currentPage-1)*pageSize + 1;
+  const end = Math.min(currentPage*pageSize, total);
+  let pages = `<button ${currentPage===1?'disabled':''} onclick="goPage(${currentPage-1})">‹</button>`;
+  const range = [];
+  for (let i = 1; i <= totalPages; i++) {
+    if (i===1||i===totalPages||(i>=currentPage-2&&i<=currentPage+2)) range.push(i);
+    else if (range[range.length-1]!=='...') range.push('...');
+  }
+  range.forEach(p => {
+    if (p==='...') pages += `<button disabled>…</button>`;
+    else pages += `<button class="${p===currentPage?'active':''}" onclick="goPage(${p})">${p}</button>`;
+  });
+  pages += `<button ${currentPage===totalPages?'disabled':''} onclick="goPage(${currentPage+1})">›</button>`;
+  return `<span class="info">Mostrando ${start}–${end} de ${total}</span><div class="pages">${pages}</div>`;
+}
+
+function goPage(p) { currentPage = p; renderUsers(); }
+function changePageSize() { pageSize = parseInt(document.getElementById('pageSize').value); currentPage = 1; renderUsers(); }
+
+function printUsers() {
+  showSection('users', document.querySelectorAll('.sidebar a')[1]);
+  const os = pageSize, op = currentPage;
+  pageSize = 9999; currentPage = 1; renderUsers();
+  setTimeout(() => { window.print(); pageSize = os; currentPage = op; renderUsers(); }, 200);
+}
+
+// ============ EDIT USER ============
+function openEdit(username) {
+  const u = allUsers.find(x => x.username === username);
+  if (!u) return;
+  document.getElementById('ed_username').value = u.username;
+  document.getElementById('editTitle').textContent = u.username;
+  document.getElementById('ed_name').value = u.fullName || '';
+  document.getElementById('ed_id').value = u.idNumber || '';
+  document.getElementById('ed_unit').value = u.workUnit || '';
+  document.getElementById('ed_pos').value = u.position || '';
+  document.getElementById('ed_email').value = u.email || '';
+  document.getElementById('ed_phone').value = u.phone || '';
+  document.getElementById('ed_role').value = u.role || 'user';
+  document.getElementById('ed_conf').value = u.confidentialityDate || '';
+  document.getElementById('ed_map').value = u.mapAuthorized ? 'true' : 'false';
+  document.getElementById('ed_enabled').value = u.enabled ? 'true' : 'false';
+  document.getElementById('ed_pass').value = '';
+  document.getElementById('editModal').classList.add('show');
+}
+
+function closeEdit() {
+  document.getElementById('editModal').classList.remove('show');
+}
+
+async function saveEdit() {
+  const username = document.getElementById('ed_username').value;
+  const body = {
+    fullName: document.getElementById('ed_name').value.trim(),
+    idNumber: document.getElementById('ed_id').value.trim(),
+    workUnit: document.getElementById('ed_unit').value.trim(),
+    position: document.getElementById('ed_pos').value.trim(),
+    email: document.getElementById('ed_email').value.trim(),
+    phone: document.getElementById('ed_phone').value.trim(),
+    role: document.getElementById('ed_role').value,
+    confidentialityDate: document.getElementById('ed_conf').value,
+    mapAuthorized: document.getElementById('ed_map').value === 'true',
+    enabled: document.getElementById('ed_enabled').value === 'true'
+  };
+  const pw = document.getElementById('ed_pass').value;
+  if (pw.trim()) body.password = pw;
+
+  const r = await fetch(`${W}/admin/users/${encodeURIComponent(username)}`, {
+    method: 'PUT', headers: H, body: JSON.stringify(body)
+  });
+  if (r.ok) {
+    toast('Usuario actualizado');
+    closeEdit();
+    await loadAll();
+  } else {
+    const d = await r.json();
+    toast(d.error || 'Error al actualizar');
+  }
+}
+
+// ============ CREATE USER ============
+async function crearUsuario() {
+  const u = document.getElementById('nu_user').value.trim();
+  const p = document.getElementById('nu_pass').value;
+  if (!u || !p) { toast('Usuario y contraseña son obligatorios'); return; }
+  const body = {
+    username: u, password: p,
+    fullName: document.getElementById('nu_name').value.trim(),
+    idNumber: document.getElementById('nu_id').value.trim(),
+    workUnit: document.getElementById('nu_unit').value.trim(),
+    position: document.getElementById('nu_pos').value.trim(),
+    email: document.getElementById('nu_email').value.trim(),
+    phone: document.getElementById('nu_phone').value.trim(),
+    role: document.getElementById('nu_role').value,
+    confidentialityDate: document.getElementById('nu_conf').value,
+    mapAuthorized: document.getElementById('nu_map').value === 'true'
+  };
+  const r = await fetch(W+'/admin/users', { method:'POST', headers:H, body:JSON.stringify(body) });
+  if (r.ok) { toast('Usuario creado'); limpiarFormulario(); await loadAll(); showSection('users',document.querySelectorAll('.sidebar a')[1]); }
+  else { const d = await r.json(); toast(d.error || 'Error al crear'); }
+}
+function limpiarFormulario() {
+  ['nu_user','nu_pass','nu_name','nu_id','nu_unit','nu_pos','nu_email','nu_phone','nu_conf'].forEach(id => document.getElementById(id).value = '');
+  document.getElementById('nu_role').value = 'user';
+  document.getElementById('nu_map').value = 'true';
+}
+
+// ============ TOGGLES & DELETE ============
+async function toggleMap(username) {
+  await fetch(`${W}/admin/users/${encodeURIComponent(username)}/toggle-map`, { method:'PATCH', headers:H });
+  await loadAll();
+}
+async function toggleEnabled(username) {
+  await fetch(`${W}/admin/users/${encodeURIComponent(username)}/toggle-enabled`, { method:'PATCH', headers:H });
+  await loadAll();
+}
+async function eliminar(username) {
+  if (!confirm('¿Eliminar usuario "'+username+'"? Esta acción no se puede deshacer.')) return;
+  await fetch(`${W}/admin/users/${encodeURIComponent(username)}`, { method:'DELETE', headers:H });
+  toast('Usuario eliminado');
+  await loadAll();
+}
+
+// ============ LOGS ============
+function renderLogs() {
+  document.getElementById('logTable').innerHTML = allLogs.map(l => `<tr>
+    <td>${l.key.split(':')[0]}</td><td>${l.ip}</td><td>${l.country}</td><td>${l.city}</td>
+    <td>${l.timezone||'—'}</td><td>${l.localTime||'—'}</td><td>${l.ts}</td>
+  </tr>`).join('');
+}
+
+// ============ SETTINGS ============
+function renderPalettes() {
+  document.getElementById('paletteGrid').innerHTML = PALETTES.map(p =>
+    `<div class="pal ${p.name===currentTheme?'selected':''}" onclick="selectPalette('${p.name}')">
+      <div class="pal-swatch" style="background:linear-gradient(135deg,${p.sidebar} 35%,${p.primary} 35%,${p.primary} 65%,${p.accent} 65%)"></div>
+      <div>${p.name}</div>
+    </div>`
+  ).join('');
+}
+
+function selectPalette(name) { currentTheme = name; renderPalettes(); }
+
+function applyThemeByName(name) {
+  const p = PALETTES.find(x => x.name === name);
+  if (!p) return;
+  document.documentElement.style.setProperty('--bg', p.bg);
+  document.documentElement.style.setProperty('--sidebar', p.sidebar);
+  document.documentElement.style.setProperty('--topbar', p.sidebar);
+  document.documentElement.style.setProperty('--primary', p.primary);
+  document.documentElement.style.setProperty('--sidebar-active', p.primary);
+  document.querySelector('.sidebar').style.background = p.sidebar;
+  document.querySelector('.topbar').style.background = p.sidebar;
+  document.body.style.background = p.bg;
+}
+
+async function saveTheme() {
+  applyThemeByName(currentTheme);
+  await fetch(W+'/admin/config', { method:'POST', headers:H, body:JSON.stringify({ theme:currentTheme }) });
+  toast('Tema aplicado');
+}
+async function saveMapUrl() {
+  const val = document.getElementById('cfg_mapUrl').value.trim();
+  if (!val) { toast('Ingrese una URL válida'); return; }
+  await fetch(W+'/admin/config', { method:'POST', headers:H, body:JSON.stringify({ mapUrl:val }) });
+  toast('URL del mapa actualizada');
+}
+
+// ============ UTILS ============
+function esc(s) { return (s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;'); }
+
+document.getElementById('searchUser').addEventListener('input', () => { currentPage = 1; renderUsers(); });
+
+// Initial load
+loadAll();
+</script>
+</body>
+</html>
