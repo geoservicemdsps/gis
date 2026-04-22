@@ -11,15 +11,37 @@ header{background:#1a5c2e;color:#fff;padding:0 1rem;height:48px;display:flex;ali
 header .left{display:flex;align-items:center;gap:.8rem}
 header .left img.logo{width:32px;height:32px;border-radius:4px;object-fit:contain}
 header h1{font-size:.95rem;font-weight:500}
-header .right{display:flex;align-items:center;gap:1rem;font-size:.85rem}
+header .right{display:flex;align-items:center;gap:.7rem;font-size:.85rem}
 .user-name{color:rgba(255,255,255,.85)}
-.btn-logout{background:rgba(255,255,255,.15);color:#fff;border:1px solid rgba(255,255,255,.3);padding:.35rem .8rem;border-radius:3px;cursor:pointer;font-size:.8rem;transition:background .2s}
-.btn-logout:hover{background:rgba(255,255,255,.25)}
+.btn-header{background:rgba(255,255,255,.15);color:#fff;border:1px solid rgba(255,255,255,.3);padding:.35rem .8rem;border-radius:3px;cursor:pointer;font-size:.8rem;transition:background .2s}
+.btn-header:hover{background:rgba(255,255,255,.25)}
+.btn-logout{background:rgba(220,60,60,.6);border-color:rgba(220,60,60,.4)}
+.btn-logout:hover{background:rgba(220,60,60,.8)}
 .no-access{display:flex;align-items:center;justify-content:center;height:calc(100% - 48px);text-align:center;padding:2rem}
 .no-access div{max-width:400px}
 .no-access h2{color:#d63638;margin-bottom:1rem}
 .no-access p{color:#50575e;line-height:1.5}
 iframe{width:100%;height:calc(100% - 48px);border:0}
+
+.modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:999;align-items:center;justify-content:center}
+.modal-overlay.show{display:flex}
+.modal{background:#fff;border-radius:8px;width:95%;max-width:420px;box-shadow:0 8px 32px rgba(0,0,0,.25);overflow:hidden}
+.modal-head{padding:14px 20px;background:#1a5c2e;color:#fff;font-weight:600;font-size:.95rem;display:flex;justify-content:space-between;align-items:center}
+.modal-head .close{background:none;border:none;color:rgba(255,255,255,.7);font-size:1.4rem;cursor:pointer;line-height:1}
+.modal-head .close:hover{color:#fff}
+.modal-body{padding:20px}
+.modal-body .field{margin-bottom:14px}
+.modal-body .field label{display:block;font-size:.82rem;font-weight:600;color:#50575e;margin-bottom:4px}
+.modal-body .field input{width:100%;padding:8px 10px;border:1px solid #c3c4c7;border-radius:4px;font-size:.9rem;color:#1d2327}
+.modal-body .field input:focus{outline:none;border-color:#1a5c2e;box-shadow:0 0 0 1px #1a5c2e}
+.modal-body .hint{font-size:.78rem;color:#888;margin-top:3px}
+.modal-foot{padding:12px 20px;border-top:1px solid #e2e4e7;display:flex;gap:8px;justify-content:flex-end;background:#f9f9f9}
+.btn-modal{padding:7px 16px;border:none;border-radius:4px;font-size:.85rem;font-weight:600;cursor:pointer}
+.btn-save{background:#1a5c2e;color:#fff}.btn-save:hover{background:#14472a}
+.btn-cancel{background:#e2e4e7;color:#333}.btn-cancel:hover{background:#d0d0d0}
+#pwMsg{font-size:.82rem;margin-top:10px;text-align:center;min-height:1.2em}
+.pw-ok{color:#00a32a}
+.pw-err{color:#d63638}
 </style>
 </head>
 <body>
@@ -30,7 +52,8 @@ iframe{width:100%;height:calc(100% - 48px);border:0}
   </div>
   <div class="right">
     <span class="user-name" id="userName"></span>
-    <button class="btn-logout" onclick="sessionStorage.clear();location='index.html'">Cerrar sesión</button>
+    <button class="btn-header" onclick="openChangePw()">🔑 Cambiar clave</button>
+    <button class="btn-header btn-logout" onclick="sessionStorage.clear();location='index.html'">Cerrar sesión</button>
   </div>
 </header>
 
@@ -42,6 +65,36 @@ iframe{width:100%;height:calc(100% - 48px);border:0}
 </div>
 
 <iframe id="mapFrame" style="display:none"></iframe>
+
+<!-- Modal Cambiar Contraseña -->
+<div class="modal-overlay" id="pwModal">
+  <div class="modal">
+    <div class="modal-head">
+      <span>Cambiar Contraseña</span>
+      <button class="close" onclick="closePwModal()">&times;</button>
+    </div>
+    <div class="modal-body">
+      <div class="field">
+        <label>Contraseña actual</label>
+        <input type="password" id="pw_current" placeholder="Ingrese su contraseña actual">
+      </div>
+      <div class="field">
+        <label>Nueva contraseña</label>
+        <input type="password" id="pw_new" placeholder="Mínimo 6 caracteres">
+        <div class="hint">Utilice una combinación de letras, números y símbolos.</div>
+      </div>
+      <div class="field">
+        <label>Confirmar nueva contraseña</label>
+        <input type="password" id="pw_confirm" placeholder="Repita la nueva contraseña">
+      </div>
+      <p id="pwMsg"></p>
+    </div>
+    <div class="modal-foot">
+      <button class="btn-modal btn-cancel" onclick="closePwModal()">Cancelar</button>
+      <button class="btn-modal btn-save" onclick="submitChangePw()">Guardar</button>
+    </div>
+  </div>
+</div>
 
 <script>
 const WORKER = 'https://nextgis-gate.geomdsps.workers.dev';
@@ -57,6 +110,77 @@ if (mapAuth === 'true' || mapAuth === true) {
 } else {
   document.getElementById('noAccess').style.display = 'flex';
 }
+
+function openChangePw() {
+  document.getElementById('pw_current').value = '';
+  document.getElementById('pw_new').value = '';
+  document.getElementById('pw_confirm').value = '';
+  document.getElementById('pwMsg').textContent = '';
+  document.getElementById('pwMsg').className = '';
+  document.getElementById('pwModal').classList.add('show');
+}
+
+function closePwModal() {
+  document.getElementById('pwModal').classList.remove('show');
+}
+
+async function submitChangePw() {
+  const msg = document.getElementById('pwMsg');
+  const current = document.getElementById('pw_current').value;
+  const newPw = document.getElementById('pw_new').value;
+  const confirm = document.getElementById('pw_confirm').value;
+
+  if (!current || !newPw || !confirm) {
+    msg.textContent = 'Complete todos los campos';
+    msg.className = 'pw-err';
+    return;
+  }
+  if (newPw.length < 6) {
+    msg.textContent = 'La nueva contraseña debe tener al menos 6 caracteres';
+    msg.className = 'pw-err';
+    return;
+  }
+  if (newPw !== confirm) {
+    msg.textContent = 'Las contraseñas nuevas no coinciden';
+    msg.className = 'pw-err';
+    return;
+  }
+  if (current === newPw) {
+    msg.textContent = 'La nueva contraseña debe ser diferente a la actual';
+    msg.className = 'pw-err';
+    return;
+  }
+
+  msg.textContent = 'Procesando...';
+  msg.className = '';
+
+  try {
+    const r = await fetch(WORKER + '/change-password', {
+      method: 'POST',
+      headers: { 'Authorization': 'Bearer ' + tk, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ currentPassword: current, newPassword: newPw })
+    });
+    const data = await r.json();
+    if (r.ok) {
+      msg.textContent = 'Contraseña actualizada. Use la nueva clave en su próximo inicio de sesión.';
+      msg.className = 'pw-ok';
+      document.getElementById('pw_current').value = '';
+      document.getElementById('pw_new').value = '';
+      document.getElementById('pw_confirm').value = '';
+      setTimeout(() => closePwModal(), 3000);
+    } else {
+      msg.textContent = data.error || 'Error al cambiar la contraseña';
+      msg.className = 'pw-err';
+    }
+  } catch (err) {
+    msg.textContent = 'Error de conexión con el servidor';
+    msg.className = 'pw-err';
+  }
+}
+
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') closePwModal();
+});
 </script>
 </body>
 </html>
