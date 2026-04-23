@@ -81,7 +81,6 @@ tr:hover td{background:#f6f7f7}
 .pal.selected{border-color:var(--primary);box-shadow:0 0 0 2px rgba(34,113,177,.3)}
 .pal-swatch{height:28px;border-radius:3px;margin-bottom:3px}
 
-/* Edit Modal */
 .modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:300;align-items:center;justify-content:center}
 .modal-overlay.show{display:flex}
 .modal{background:#fff;border-radius:8px;width:95%;max-width:600px;max-height:90vh;display:flex;flex-direction:column;box-shadow:0 8px 32px rgba(0,0,0,.25)}
@@ -91,6 +90,11 @@ tr:hover td{background:#f6f7f7}
 .modal-foot{padding:12px 20px;border-top:1px solid #ddd;display:flex;gap:8px;justify-content:flex-end}
 
 .actions-cell{display:flex;gap:4px;flex-wrap:nowrap}
+
+.toolbar{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.toolbar label{font-size:.8rem;font-weight:400;color:var(--text-sec)}
+.toolbar input[type="date"]{padding:3px 6px;border:1px solid #ccc;border-radius:3px;font-size:.82rem}
+.toolbar select{padding:3px 6px;border:1px solid #ccc;border-radius:3px;font-size:.82rem}
 
 @media print{
   .topbar,.sidebar,.no-print{display:none!important}
@@ -179,7 +183,7 @@ tr:hover td{background:#f6f7f7}
       </div>
     </div>
     <div class="panel">
-      <div class="panel-header">Últimos accesos</div>
+      <div class="panel-header">Últimos 10 accesos</div>
       <div class="panel-body"><table><thead><tr><th>Usuario</th><th>IP</th><th>País</th><th>Ciudad</th><th>Fecha/Hora Local</th></tr></thead><tbody id="dashLogs"></tbody></table></div>
     </div>
   </div>
@@ -189,27 +193,20 @@ tr:hover td{background:#f6f7f7}
     <h1 class="page-title">Usuarios <span id="userCount"></span></h1>
     <div class="panel">
       <div class="panel-header">
-        <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
+        <div class="toolbar">
           <span>Listado de usuarios</span>
           <input type="text" id="searchUser" placeholder="Buscar..." style="padding:4px 8px;border:1px solid #ccc;border-radius:3px;font-size:.85rem">
         </div>
-        <div class="no-print" style="display:flex;align-items:center;gap:10px">
-          <label style="font-size:.8rem;font-weight:400;color:var(--text-sec)">Mostrar:
-            <select id="pageSize" onchange="changePageSize()" style="padding:3px 6px;border:1px solid #ccc;border-radius:3px;font-size:.82rem">
-              <option value="5">5</option><option value="10" selected>10</option><option value="25">25</option><option value="50">50</option><option value="100">100</option>
-            </select>
-          </label>
+        <div class="toolbar no-print">
+          <label>Mostrar: <select id="pageSize" onchange="changePageSize()"><option value="5">5</option><option value="10" selected>10</option><option value="25">25</option><option value="50">50</option><option value="100">100</option></select></label>
           <button class="btn btn-outline btn-sm" onclick="printUsers()">🖨️ Imprimir</button>
         </div>
       </div>
       <div class="pagination no-print" id="paginationTop" style="padding:8px 16px 0"></div>
       <div class="panel-body">
-        <table>
-          <thead><tr>
-            <th>Usuario</th><th>Nombre Completo</th><th>Unidad</th><th>Cargo</th><th>Correo</th><th>Rol</th><th>Estado</th><th>Mapa</th><th>Términos</th><th class="no-print">Acciones</th>
-          </tr></thead>
-          <tbody id="userTable"></tbody>
-        </table>
+        <table><thead><tr>
+          <th>Usuario</th><th>Nombre Completo</th><th>Unidad</th><th>Cargo</th><th>Correo</th><th>Rol</th><th>Estado</th><th>Mapa</th><th>Términos</th><th class="no-print">Acciones</th>
+        </tr></thead><tbody id="userTable"></tbody></table>
       </div>
       <div class="pagination no-print" id="paginationBottom" style="padding:0 16px 12px"></div>
     </div>
@@ -244,10 +241,27 @@ tr:hover td{background:#f6f7f7}
 
   <!-- LOGS -->
   <div class="section" id="sec-logs">
-    <h1 class="page-title">Registro de Accesos</h1>
+    <h1 class="page-title">Registro de Accesos <span id="logCount"></span></h1>
     <div class="panel">
-      <div class="panel-header">Historial de inicios de sesión</div>
-      <div class="panel-body"><table><thead><tr><th>Usuario</th><th>IP</th><th>País</th><th>Ciudad</th><th>Zona Horaria</th><th>Fecha/Hora Local</th><th>Fecha UTC</th></tr></thead><tbody id="logTable"></tbody></table></div>
+      <div class="panel-header">
+        <div class="toolbar">
+          <span>Historial de inicios de sesión</span>
+          <label>Desde: <input type="date" id="logDateFrom"></label>
+          <label>Hasta: <input type="date" id="logDateTo"></label>
+          <button class="btn btn-outline btn-sm" onclick="filterLogs()">Filtrar</button>
+          <button class="btn btn-outline btn-sm" onclick="clearLogFilter()">Limpiar filtro</button>
+        </div>
+        <div class="toolbar no-print">
+          <label>Mostrar: <select id="logPageSize" onchange="changeLogPageSize()"><option value="10">10</option><option value="25" selected>25</option><option value="50">50</option><option value="100">100</option><option value="500">500</option></select></label>
+          <button class="btn btn-outline btn-sm" onclick="printLogs()">🖨️ Imprimir</button>
+          <button class="btn btn-success btn-sm" onclick="exportLogsCSV()">📥 Exportar CSV</button>
+        </div>
+      </div>
+      <div class="pagination no-print" id="logPaginationTop" style="padding:8px 16px 0"></div>
+      <div class="panel-body">
+        <table><thead><tr><th>Usuario</th><th>IP</th><th>País</th><th>Ciudad</th><th>Zona Horaria</th><th>Fecha/Hora Local</th><th>Fecha UTC</th></tr></thead><tbody id="logTable"></tbody></table>
+      </div>
+      <div class="pagination no-print" id="logPaginationBottom" style="padding:0 16px 12px"></div>
     </div>
   </div>
 
@@ -276,7 +290,6 @@ tr:hover td{background:#f6f7f7}
 
 </div>
 
-<!-- Chart.js loaded at end to not block rendering -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.7/chart.umd.min.js"></script>
 <script>
 const W = 'https://nextgis-gate.geomdsps.workers.dev';
@@ -286,386 +299,209 @@ const H = { 'Authorization':'Bearer '+tk, 'Content-Type':'application/json' };
 
 document.getElementById('adminName').textContent = sessionStorage.getItem('fullName') || 'Admin';
 
-const PALETTES = [
-  {name:'WP Clásico',bg:'#f0f0f1',sidebar:'#1d2327',primary:'#2271b1',accent:'#d63638'},
-  {name:'Océano',bg:'#eef4f8',sidebar:'#1b3a4b',primary:'#006d77',accent:'#e29578'},
-  {name:'Bosque',bg:'#f0f4ef',sidebar:'#2d3a2e',primary:'#386641',accent:'#a7c957'},
-  {name:'Lavanda',bg:'#f5f0fa',sidebar:'#2e1a47',primary:'#7b2cbf',accent:'#c77dff'},
-  {name:'Coral',bg:'#fef0ed',sidebar:'#3d1e1e',primary:'#d62828',accent:'#f77f00'},
-  {name:'Cielo',bg:'#edf5fc',sidebar:'#1a365d',primary:'#2b6cb0',accent:'#63b3ed'},
-  {name:'Arena',bg:'#faf5ef',sidebar:'#44403c',primary:'#92400e',accent:'#d97706'},
-  {name:'Menta',bg:'#effaf6',sidebar:'#1a3a2a',primary:'#059669',accent:'#34d399'},
-  {name:'Rosa',bg:'#fdf0f5',sidebar:'#3d1a2e',primary:'#be185d',accent:'#f472b6'},
-  {name:'Pizarra',bg:'#f1f5f9',sidebar:'#1e293b',primary:'#475569',accent:'#94a3b8'},
-  {name:'Ámbar',bg:'#fefce8',sidebar:'#3f3811',primary:'#a16207',accent:'#facc15'},
-  {name:'Índigo',bg:'#eef2ff',sidebar:'#1e1b4b',primary:'#4338ca',accent:'#818cf8'},
-  {name:'Terracota',bg:'#fef2f0',sidebar:'#431407',primary:'#c2410c',accent:'#fb923c'},
-  {name:'Jade',bg:'#ecfdf5',sidebar:'#064e3b',primary:'#047857',accent:'#6ee7b7'},
-  {name:'Ciruela',bg:'#faf5ff',sidebar:'#3b0764',primary:'#7e22ce',accent:'#c084fc'},
-  {name:'Carbón',bg:'#f4f4f5',sidebar:'#27272a',primary:'#52525b',accent:'#a1a1aa'},
-  {name:'Tomate',bg:'#fff1f2',sidebar:'#4c0519',primary:'#e11d48',accent:'#fb7185'},
-  {name:'Turquesa',bg:'#f0fdfa',sidebar:'#134e4a',primary:'#0d9488',accent:'#5eead4'},
-  {name:'Granate',bg:'#fdf2f8',sidebar:'#500724',primary:'#9d174d',accent:'#f9a8d4'},
-  {name:'Oliva',bg:'#f7fee7',sidebar:'#1a2e05',primary:'#4d7c0f',accent:'#a3e635'},
-  {name:'Zafiro',bg:'#eff6ff',sidebar:'#1e3a5f',primary:'#1d4ed8',accent:'#60a5fa'},
-  {name:'Cobre',bg:'#fdf4ef',sidebar:'#451a03',primary:'#b45309',accent:'#fbbf24'},
-  {name:'Neón Suave',bg:'#f0fdf4',sidebar:'#14532d',primary:'#15803d',accent:'#4ade80'},
-  {name:'Noche Azul',bg:'#f0f4ff',sidebar:'#0f172a',primary:'#3b82f6',accent:'#93c5fd'},
-  {name:'Melocotón',bg:'#fff7ed',sidebar:'#431407',primary:'#ea580c',accent:'#fdba74'},
-  {name:'Violeta',bg:'#f5f3ff',sidebar:'#2e1065',primary:'#6d28d9',accent:'#a78bfa'},
-  {name:'Esmeralda',bg:'#ecfdf5',sidebar:'#022c22',primary:'#059669',accent:'#a7f3d0'},
-  {name:'Arcilla',bg:'#faf5f0',sidebar:'#292524',primary:'#78716c',accent:'#d6d3d1'},
-  {name:'Amanecer',bg:'#fff8f1',sidebar:'#3c1810',primary:'#c2410c',accent:'#fcd34d'},
-  {name:'Glaciar',bg:'#f0f9ff',sidebar:'#0c4a6e',primary:'#0284c7',accent:'#7dd3fc'},
-];
+const PALETTES=[{name:'WP Clásico',bg:'#f0f0f1',sidebar:'#1d2327',primary:'#2271b1',accent:'#d63638'},{name:'Océano',bg:'#eef4f8',sidebar:'#1b3a4b',primary:'#006d77',accent:'#e29578'},{name:'Bosque',bg:'#f0f4ef',sidebar:'#2d3a2e',primary:'#386641',accent:'#a7c957'},{name:'Lavanda',bg:'#f5f0fa',sidebar:'#2e1a47',primary:'#7b2cbf',accent:'#c77dff'},{name:'Coral',bg:'#fef0ed',sidebar:'#3d1e1e',primary:'#d62828',accent:'#f77f00'},{name:'Cielo',bg:'#edf5fc',sidebar:'#1a365d',primary:'#2b6cb0',accent:'#63b3ed'},{name:'Arena',bg:'#faf5ef',sidebar:'#44403c',primary:'#92400e',accent:'#d97706'},{name:'Menta',bg:'#effaf6',sidebar:'#1a3a2a',primary:'#059669',accent:'#34d399'},{name:'Rosa',bg:'#fdf0f5',sidebar:'#3d1a2e',primary:'#be185d',accent:'#f472b6'},{name:'Pizarra',bg:'#f1f5f9',sidebar:'#1e293b',primary:'#475569',accent:'#94a3b8'},{name:'Ámbar',bg:'#fefce8',sidebar:'#3f3811',primary:'#a16207',accent:'#facc15'},{name:'Índigo',bg:'#eef2ff',sidebar:'#1e1b4b',primary:'#4338ca',accent:'#818cf8'},{name:'Terracota',bg:'#fef2f0',sidebar:'#431407',primary:'#c2410c',accent:'#fb923c'},{name:'Jade',bg:'#ecfdf5',sidebar:'#064e3b',primary:'#047857',accent:'#6ee7b7'},{name:'Ciruela',bg:'#faf5ff',sidebar:'#3b0764',primary:'#7e22ce',accent:'#c084fc'},{name:'Carbón',bg:'#f4f4f5',sidebar:'#27272a',primary:'#52525b',accent:'#a1a1aa'},{name:'Tomate',bg:'#fff1f2',sidebar:'#4c0519',primary:'#e11d48',accent:'#fb7185'},{name:'Turquesa',bg:'#f0fdfa',sidebar:'#134e4a',primary:'#0d9488',accent:'#5eead4'},{name:'Granate',bg:'#fdf2f8',sidebar:'#500724',primary:'#9d174d',accent:'#f9a8d4'},{name:'Oliva',bg:'#f7fee7',sidebar:'#1a2e05',primary:'#4d7c0f',accent:'#a3e635'},{name:'Zafiro',bg:'#eff6ff',sidebar:'#1e3a5f',primary:'#1d4ed8',accent:'#60a5fa'},{name:'Cobre',bg:'#fdf4ef',sidebar:'#451a03',primary:'#b45309',accent:'#fbbf24'},{name:'Neón Suave',bg:'#f0fdf4',sidebar:'#14532d',primary:'#15803d',accent:'#4ade80'},{name:'Noche Azul',bg:'#f0f4ff',sidebar:'#0f172a',primary:'#3b82f6',accent:'#93c5fd'},{name:'Melocotón',bg:'#fff7ed',sidebar:'#431407',primary:'#ea580c',accent:'#fdba74'},{name:'Violeta',bg:'#f5f3ff',sidebar:'#2e1065',primary:'#6d28d9',accent:'#a78bfa'},{name:'Esmeralda',bg:'#ecfdf5',sidebar:'#022c22',primary:'#059669',accent:'#a7f3d0'},{name:'Arcilla',bg:'#faf5f0',sidebar:'#292524',primary:'#78716c',accent:'#d6d3d1'},{name:'Amanecer',bg:'#fff8f1',sidebar:'#3c1810',primary:'#c2410c',accent:'#fcd34d'},{name:'Glaciar',bg:'#f0f9ff',sidebar:'#0c4a6e',primary:'#0284c7',accent:'#7dd3fc'}];
+const CHART_COLORS=['#2271b1','#00a32a','#d63638','#dba617','#3858e9','#059669','#7b2cbf','#ea580c','#0d9488','#be185d','#4d7c0f','#b45309','#6d28d9','#0284c7','#9d174d','#386641','#d62828','#006d77','#4338ca','#c2410c'];
 
-const CHART_COLORS = [
-  '#2271b1','#00a32a','#d63638','#dba617','#3858e9',
-  '#059669','#7b2cbf','#ea580c','#0d9488','#be185d',
-  '#4d7c0f','#b45309','#6d28d9','#0284c7','#9d174d',
-  '#386641','#d62828','#006d77','#4338ca','#c2410c'
-];
+let allUsers=[],allLogs=[],filteredLogs=[],currentTheme='WP Clásico';
+let currentPage=1,pageSize=10;
+let logPage=1,logPageSize=25;
+let chartLogins=null,chartUnits=null;
+let dataReady=false;
 
-let allUsers = [];
-let allLogs = [];
-let currentTheme = 'WP Clásico';
-let currentPage = 1;
-let pageSize = 10;
-let chartLogins = null;
-let chartUnits = null;
-let dataReady = false;
-
-// ============ SECTION NAVIGATION ============
-function showSection(id, el) {
-  document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+function showSection(id,el){
+  document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));
   document.getElementById('sec-'+id).classList.add('active');
-  document.querySelectorAll('.sidebar a').forEach(a => a.classList.remove('active'));
-  if (el) el.classList.add('active');
-  // Re-render data when switching sections to ensure visibility
-  if (dataReady) {
-    if (id === 'users') renderUsers();
-    if (id === 'dashboard') { renderStats(); renderCharts(); }
-    if (id === 'logs') renderLogs();
+  document.querySelectorAll('.sidebar a').forEach(a=>a.classList.remove('active'));
+  if(el)el.classList.add('active');
+  if(dataReady){
+    if(id==='users')renderUsers();
+    if(id==='dashboard'){renderStats();renderCharts();}
+    if(id==='logs')renderLogs();
   }
 }
 
-function toast(msg, dur=2500) {
-  const t = document.getElementById('toast');
-  t.textContent = msg; t.classList.add('show');
-  setTimeout(() => t.classList.remove('show'), dur);
+function toast(msg,dur=2500){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),dur);}
+
+async function loadAll(){
+  try{
+    const[uRes,lRes,cRes]=await Promise.all([fetch(W+'/admin/users',{headers:H}),fetch(W+'/admin/logs',{headers:H}),fetch(W+'/admin/config',{headers:H})]);
+    allUsers=await uRes.json();
+    allLogs=await lRes.json();
+    filteredLogs=[...allLogs];
+    const config=await cRes.json();
+    document.getElementById('cfg_mapUrl').value=config.mapUrl||'';
+    if(config.theme){currentTheme=config.theme;applyThemeByName(config.theme);}
+    dataReady=true;
+    renderStats();renderCharts();renderUsers();renderLogs();renderPalettes();
+  }catch(e){console.error('Error:',e);toast('Error al conectar con el servidor');}
 }
 
-// ============ DATA LOADING ============
-async function loadAll() {
-  try {
-    const [uRes, lRes, cRes] = await Promise.all([
-      fetch(W+'/admin/users', {headers:H}),
-      fetch(W+'/admin/logs', {headers:H}),
-      fetch(W+'/admin/config', {headers:H})
-    ]);
-    allUsers = await uRes.json();
-    allLogs = await lRes.json();
-    const config = await cRes.json();
-    document.getElementById('cfg_mapUrl').value = config.mapUrl || '';
-    if (config.theme) { currentTheme = config.theme; applyThemeByName(config.theme); }
-    dataReady = true;
-    renderStats();
-    renderCharts();
-    renderUsers();
-    renderLogs();
-    renderPalettes();
-  } catch(e) {
-    console.error('Error cargando datos:', e);
-    toast('Error al conectar con el servidor');
-  }
+// ===== DASHBOARD =====
+function renderStats(){
+  document.getElementById('stTotal').textContent=allUsers.length;
+  document.getElementById('stActive').textContent=allUsers.filter(u=>u.enabled).length;
+  document.getElementById('stMap').textContent=allUsers.filter(u=>u.mapAuthorized).length;
+  document.getElementById('stLogins').textContent=allLogs.length;
+  document.getElementById('dashLogs').innerHTML=allLogs.slice(0,10).map(l=>`<tr><td>${l.key.split(':')[0]}</td><td>${l.ip}</td><td>${l.country}</td><td>${l.city}</td><td>${l.localTime||l.ts}</td></tr>`).join('');
 }
 
-// ============ DASHBOARD ============
-function renderStats() {
-  document.getElementById('stTotal').textContent = allUsers.length;
-  document.getElementById('stActive').textContent = allUsers.filter(u=>u.enabled).length;
-  document.getElementById('stMap').textContent = allUsers.filter(u=>u.mapAuthorized).length;
-  document.getElementById('stLogins').textContent = allLogs.length;
-  const recent = allLogs.slice(0,8);
-  document.getElementById('dashLogs').innerHTML = recent.map(l =>
-    `<tr><td>${l.key.split(':')[0]}</td><td>${l.ip}</td><td>${l.country}</td><td>${l.city}</td><td>${l.localTime||l.ts}</td></tr>`
-  ).join('');
-}
-
-function renderCharts() {
-  if (typeof Chart === 'undefined') return; // Chart.js not loaded yet
-
-  // Chart 1: Top 20 by login count
-  const loginCounts = {};
-  allLogs.forEach(l => {
-    const user = l.key.split(':')[0];
-    loginCounts[user] = (loginCounts[user] || 0) + 1;
+function renderCharts(){
+  if(typeof Chart==='undefined')return;
+  // Chart 1
+  const lc={};allLogs.forEach(l=>{const u=l.key.split(':')[0];lc[u]=(lc[u]||0)+1;});
+  const sorted=Object.entries(lc).sort((a,b)=>b[1]-a[1]).slice(0,20);
+  if(chartLogins)chartLogins.destroy();
+  chartLogins=new Chart(document.getElementById('chartLogins').getContext('2d'),{
+    type:'bar',data:{labels:sorted.map(e=>e[0]),datasets:[{label:'Inicios de sesión',data:sorted.map(e=>e[1]),backgroundColor:sorted.map((_,i)=>CHART_COLORS[i%CHART_COLORS.length]),borderRadius:4,barThickness:sorted.length>10?14:24}]},
+    options:{responsive:true,maintainAspectRatio:false,indexAxis:'y',plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>`${c.parsed.x} acceso(s)`}}},scales:{x:{beginAtZero:true,ticks:{stepSize:1,font:{size:11}},grid:{color:'#e2e4e7'},title:{display:true,text:'Cantidad de accesos',font:{size:12}}},y:{ticks:{font:{size:11}},grid:{display:false}}}}
   });
-  const sorted = Object.entries(loginCounts).sort((a,b) => b[1]-a[1]).slice(0,20);
-
-  if (chartLogins) chartLogins.destroy();
-  chartLogins = new Chart(document.getElementById('chartLogins').getContext('2d'), {
-    type: 'bar',
-    data: {
-      labels: sorted.map(e => e[0]),
-      datasets: [{
-        label: 'Inicios de sesión',
-        data: sorted.map(e => e[1]),
-        backgroundColor: sorted.map((_, i) => CHART_COLORS[i % CHART_COLORS.length]),
-        borderRadius: 4,
-        barThickness: sorted.length > 10 ? 14 : 24
-      }]
-    },
-    options: {
-      responsive: true, maintainAspectRatio: false, indexAxis: 'y',
-      plugins: { legend: { display: false }, tooltip: { callbacks: { label: ctx => `${ctx.parsed.x} acceso(s)` } } },
-      scales: {
-        x: { beginAtZero: true, ticks: { stepSize: 1, font: { size: 11 } }, grid: { color: '#e2e4e7' }, title: { display: true, text: 'Cantidad de accesos', font: { size: 12 } } },
-        y: { ticks: { font: { size: 11 } }, grid: { display: false } }
-      }
-    }
-  });
-
-  // Chart 2: Users by Work Unit
-  const unitCounts = {};
-  allUsers.forEach(u => {
-    const unit = u.workUnit || 'Sin asignar';
-    unitCounts[unit] = (unitCounts[unit] || 0) + 1;
-  });
-  const unitLabels = Object.keys(unitCounts);
-  const unitData = Object.values(unitCounts);
-
-  if (chartUnits) chartUnits.destroy();
-  chartUnits = new Chart(document.getElementById('chartUnits').getContext('2d'), {
-    type: 'doughnut',
-    data: {
-      labels: unitLabels,
-      datasets: [{ data: unitData, backgroundColor: unitLabels.map((_, i) => CHART_COLORS[i % CHART_COLORS.length]), borderWidth: 2, borderColor: '#fff' }]
-    },
-    options: {
-      responsive: true, maintainAspectRatio: false,
-      plugins: {
-        legend: { position: 'bottom', labels: { padding: 12, font: { size: 11 }, usePointStyle: true, pointStyle: 'circle' } },
-        tooltip: { callbacks: { label: ctx => ` ${ctx.label}: ${ctx.parsed} usuario(s)` } }
-      }
-    }
+  // Chart 2
+  const uc={};allUsers.forEach(u=>{const unit=u.workUnit||'Sin asignar';uc[unit]=(uc[unit]||0)+1;});
+  if(chartUnits)chartUnits.destroy();
+  chartUnits=new Chart(document.getElementById('chartUnits').getContext('2d'),{
+    type:'doughnut',data:{labels:Object.keys(uc),datasets:[{data:Object.values(uc),backgroundColor:Object.keys(uc).map((_,i)=>CHART_COLORS[i%CHART_COLORS.length]),borderWidth:2,borderColor:'#fff'}]},
+    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'bottom',labels:{padding:12,font:{size:11},usePointStyle:true,pointStyle:'circle'}},tooltip:{callbacks:{label:c=>` ${c.label}: ${c.parsed} usuario(s)`}}}}
   });
 }
 
-// ============ USERS TABLE ============
-function getFilteredUsers() {
-  const f = (document.getElementById('searchUser').value || '').toLowerCase();
-  return f ? allUsers.filter(u => (u.username+u.fullName+u.workUnit+u.email+u.position).toLowerCase().includes(f)) : [...allUsers];
+// ===== USERS =====
+function getFilteredUsers(){const f=(document.getElementById('searchUser').value||'').toLowerCase();return f?allUsers.filter(u=>(u.username+u.fullName+u.workUnit+u.email+u.position).toLowerCase().includes(f)):[...allUsers];}
+
+function renderUsers(){
+  const filtered=getFilteredUsers();const totalPages=Math.max(1,Math.ceil(filtered.length/pageSize));
+  if(currentPage>totalPages)currentPage=totalPages;
+  const start=(currentPage-1)*pageSize;const page=filtered.slice(start,start+pageSize);
+  document.getElementById('userCount').textContent=`(${filtered.length})`;
+  document.getElementById('userTable').innerHTML=page.map(u=>{const uE=esc(u.username);return`<tr><td><strong>${uE}</strong></td><td>${esc(u.fullName)}</td><td>${esc(u.workUnit)}</td><td>${esc(u.position)}</td><td>${esc(u.email)}</td><td>${u.role==='admin'?'<span style="color:var(--primary);font-weight:600">Admin</span>':'Usuario'}</td><td><label class="toggle" title="${u.enabled?'Activo':'Inactivo'}"><input type="checkbox" ${u.enabled?'checked':''} onchange="toggleEnabled('${uE}')"><span class="slider"></span></label></td><td><label class="toggle" title="${u.mapAuthorized?'Autorizado':'No autorizado'}"><input type="checkbox" ${u.mapAuthorized?'checked':''} onchange="toggleMap('${uE}')"><span class="slider"></span></label></td><td>${u.acceptedTerms?'✅':'⏳'}</td><td class="no-print"><div class="actions-cell"><button class="btn btn-success btn-sm" onclick="openEdit('${uE}')">Editar</button>${u.username!=='admin'?'<button class="btn btn-danger btn-sm" onclick="eliminar(\''+uE+'\')">Eliminar</button>':''}</div></td></tr>`;}).join('');
+  const ph=buildPagination(filtered.length,totalPages,currentPage,'goPage');
+  document.getElementById('paginationTop').innerHTML=ph;document.getElementById('paginationBottom').innerHTML=ph;
 }
 
-function renderUsers() {
-  const filtered = getFilteredUsers();
-  const totalPages = Math.max(1, Math.ceil(filtered.length / pageSize));
-  if (currentPage > totalPages) currentPage = totalPages;
-  const start = (currentPage - 1) * pageSize;
-  const page = filtered.slice(start, start + pageSize);
-
-  document.getElementById('userCount').textContent = `(${filtered.length})`;
-  document.getElementById('userTable').innerHTML = page.map(u => {
-    const uEsc = esc(u.username);
-    return `<tr>
-    <td><strong>${uEsc}</strong></td>
-    <td>${esc(u.fullName)}</td>
-    <td>${esc(u.workUnit)}</td>
-    <td>${esc(u.position)}</td>
-    <td>${esc(u.email)}</td>
-    <td>${u.role==='admin'?'<span style="color:var(--primary);font-weight:600">Admin</span>':'Usuario'}</td>
-    <td><label class="toggle" title="${u.enabled?'Activo':'Inactivo'}"><input type="checkbox" ${u.enabled?'checked':''} onchange="toggleEnabled('${uEsc}')"><span class="slider"></span></label></td>
-    <td><label class="toggle" title="${u.mapAuthorized?'Autorizado':'No autorizado'}"><input type="checkbox" ${u.mapAuthorized?'checked':''} onchange="toggleMap('${uEsc}')"><span class="slider"></span></label></td>
-    <td>${u.acceptedTerms?'✅':'⏳'}</td>
-    <td class="no-print"><div class="actions-cell">
-      <button class="btn btn-success btn-sm" onclick="openEdit('${uEsc}')">Editar</button>
-      ${u.username!=='admin'?'<button class="btn btn-danger btn-sm" onclick="eliminar(\''+uEsc+'\')">Eliminar</button>':''}
-    </div></td>
-  </tr>`;
-  }).join('');
-
-  const ph = buildPagination(filtered.length, totalPages);
-  document.getElementById('paginationTop').innerHTML = ph;
-  document.getElementById('paginationBottom').innerHTML = ph;
+function buildPagination(total,totalPages,curPage,fnName){
+  if(totalPages<=1)return`<span class="info">Mostrando ${total} registro(s)</span>`;
+  const s=(curPage-1)*(fnName==='goPage'?pageSize:logPageSize)+1;const e=Math.min(curPage*(fnName==='goPage'?pageSize:logPageSize),total);
+  let p=`<button ${curPage===1?'disabled':''} onclick="${fnName}(${curPage-1})">‹</button>`;
+  const range=[];for(let i=1;i<=totalPages;i++){if(i===1||i===totalPages||(i>=curPage-2&&i<=curPage+2))range.push(i);else if(range[range.length-1]!=='...')range.push('...');}
+  range.forEach(x=>{if(x==='...')p+=`<button disabled>…</button>`;else p+=`<button class="${x===curPage?'active':''}" onclick="${fnName}(${x})">${x}</button>`;});
+  p+=`<button ${curPage===totalPages?'disabled':''} onclick="${fnName}(${curPage+1})">›</button>`;
+  return`<span class="info">Mostrando ${s}–${e} de ${total}</span><div class="pages">${p}</div>`;
 }
 
-function buildPagination(total, totalPages) {
-  if (totalPages <= 1) return `<span class="info">Mostrando ${total} registro(s)</span>`;
-  const start = (currentPage-1)*pageSize + 1;
-  const end = Math.min(currentPage*pageSize, total);
-  let pages = `<button ${currentPage===1?'disabled':''} onclick="goPage(${currentPage-1})">‹</button>`;
-  const range = [];
-  for (let i = 1; i <= totalPages; i++) {
-    if (i===1||i===totalPages||(i>=currentPage-2&&i<=currentPage+2)) range.push(i);
-    else if (range[range.length-1]!=='...') range.push('...');
-  }
-  range.forEach(p => {
-    if (p==='...') pages += `<button disabled>…</button>`;
-    else pages += `<button class="${p===currentPage?'active':''}" onclick="goPage(${p})">${p}</button>`;
+function goPage(p){currentPage=p;renderUsers();}
+function changePageSize(){pageSize=parseInt(document.getElementById('pageSize').value);currentPage=1;renderUsers();}
+function printUsers(){showSection('users',document.querySelectorAll('.sidebar a')[1]);const os=pageSize,op=currentPage;pageSize=9999;currentPage=1;renderUsers();setTimeout(()=>{window.print();pageSize=os;currentPage=op;renderUsers();},200);}
+
+// ===== LOGS =====
+function filterLogs(){
+  const from=document.getElementById('logDateFrom').value;
+  const to=document.getElementById('logDateTo').value;
+  filteredLogs=allLogs.filter(l=>{
+    const d=l.ts?l.ts.substring(0,10):'';
+    if(from&&d<from)return false;
+    if(to&&d>to)return false;
+    return true;
   });
-  pages += `<button ${currentPage===totalPages?'disabled':''} onclick="goPage(${currentPage+1})">›</button>`;
-  return `<span class="info">Mostrando ${start}–${end} de ${total}</span><div class="pages">${pages}</div>`;
+  logPage=1;
+  renderLogs();
 }
 
-function goPage(p) { currentPage = p; renderUsers(); }
-function changePageSize() { pageSize = parseInt(document.getElementById('pageSize').value); currentPage = 1; renderUsers(); }
-
-function printUsers() {
-  showSection('users', document.querySelectorAll('.sidebar a')[1]);
-  const os = pageSize, op = currentPage;
-  pageSize = 9999; currentPage = 1; renderUsers();
-  setTimeout(() => { window.print(); pageSize = os; currentPage = op; renderUsers(); }, 200);
+function clearLogFilter(){
+  document.getElementById('logDateFrom').value='';
+  document.getElementById('logDateTo').value='';
+  filteredLogs=[...allLogs];
+  logPage=1;
+  renderLogs();
 }
 
-// ============ EDIT USER ============
-function openEdit(username) {
-  const u = allUsers.find(x => x.username === username);
-  if (!u) return;
-  document.getElementById('ed_username').value = u.username;
-  document.getElementById('editTitle').textContent = u.username;
-  document.getElementById('ed_name').value = u.fullName || '';
-  document.getElementById('ed_id').value = u.idNumber || '';
-  document.getElementById('ed_unit').value = u.workUnit || '';
-  document.getElementById('ed_pos').value = u.position || '';
-  document.getElementById('ed_email').value = u.email || '';
-  document.getElementById('ed_phone').value = u.phone || '';
-  document.getElementById('ed_role').value = u.role || 'user';
-  document.getElementById('ed_conf').value = u.confidentialityDate || '';
-  document.getElementById('ed_map').value = u.mapAuthorized ? 'true' : 'false';
-  document.getElementById('ed_enabled').value = u.enabled ? 'true' : 'false';
-  document.getElementById('ed_pass').value = '';
-  document.getElementById('editModal').classList.add('show');
+function renderLogs(){
+  const total=filteredLogs.length;
+  const totalPages=Math.max(1,Math.ceil(total/logPageSize));
+  if(logPage>totalPages)logPage=totalPages;
+  const start=(logPage-1)*logPageSize;
+  const page=filteredLogs.slice(start,start+logPageSize);
+  document.getElementById('logCount').textContent=`(${total} registros)`;
+  document.getElementById('logTable').innerHTML=page.map(l=>`<tr><td>${l.key.split(':')[0]}</td><td>${l.ip}</td><td>${l.country}</td><td>${l.city}</td><td>${l.timezone||'—'}</td><td>${l.localTime||'—'}</td><td>${l.ts}</td></tr>`).join('');
+  const ph=buildPagination(total,totalPages,logPage,'goLogPage');
+  document.getElementById('logPaginationTop').innerHTML=ph;
+  document.getElementById('logPaginationBottom').innerHTML=ph;
 }
 
-function closeEdit() {
-  document.getElementById('editModal').classList.remove('show');
+function goLogPage(p){logPage=p;renderLogs();}
+function changeLogPageSize(){logPageSize=parseInt(document.getElementById('logPageSize').value);logPage=1;renderLogs();}
+
+function printLogs(){
+  showSection('logs',document.querySelectorAll('.sidebar a')[3]);
+  const os=logPageSize,op=logPage;logPageSize=9999;logPage=1;renderLogs();
+  setTimeout(()=>{window.print();logPageSize=os;logPage=op;renderLogs();},200);
 }
 
-async function saveEdit() {
-  const username = document.getElementById('ed_username').value;
-  const body = {
-    fullName: document.getElementById('ed_name').value.trim(),
-    idNumber: document.getElementById('ed_id').value.trim(),
-    workUnit: document.getElementById('ed_unit').value.trim(),
-    position: document.getElementById('ed_pos').value.trim(),
-    email: document.getElementById('ed_email').value.trim(),
-    phone: document.getElementById('ed_phone').value.trim(),
-    role: document.getElementById('ed_role').value,
-    confidentialityDate: document.getElementById('ed_conf').value,
-    mapAuthorized: document.getElementById('ed_map').value === 'true',
-    enabled: document.getElementById('ed_enabled').value === 'true'
-  };
-  const pw = document.getElementById('ed_pass').value;
-  if (pw.trim()) body.password = pw;
-
-  const r = await fetch(`${W}/admin/users/${encodeURIComponent(username)}`, {
-    method: 'PUT', headers: H, body: JSON.stringify(body)
+function exportLogsCSV(){
+  const rows=[['Usuario','IP','País','Ciudad','Zona Horaria','Fecha/Hora Local','Fecha UTC']];
+  filteredLogs.forEach(l=>{
+    rows.push([l.key.split(':')[0],l.ip,l.country,l.city,l.timezone||'',l.localTime||'',l.ts]);
   });
-  if (r.ok) {
-    toast('Usuario actualizado');
-    closeEdit();
-    await loadAll();
-  } else {
-    const d = await r.json();
-    toast(d.error || 'Error al actualizar');
-  }
+  const csv=rows.map(r=>r.map(c=>`"${(c||'').replace(/"/g,'""')}"`).join(',')).join('\n');
+  const bom='\uFEFF';
+  const blob=new Blob([bom+csv],{type:'text/csv;charset=utf-8;'});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement('a');
+  const from=document.getElementById('logDateFrom').value;
+  const to=document.getElementById('logDateTo').value;
+  let fname='accesos';
+  if(from)fname+=`_desde_${from}`;
+  if(to)fname+=`_hasta_${to}`;
+  a.href=url;a.download=fname+'.csv';document.body.appendChild(a);a.click();document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+  toast(`CSV exportado: ${filteredLogs.length} registros`);
 }
 
-// ============ CREATE USER ============
-async function crearUsuario() {
-  const u = document.getElementById('nu_user').value.trim();
-  const p = document.getElementById('nu_pass').value;
-  if (!u || !p) { toast('Usuario y contraseña son obligatorios'); return; }
-  const body = {
-    username: u, password: p,
-    fullName: document.getElementById('nu_name').value.trim(),
-    idNumber: document.getElementById('nu_id').value.trim(),
-    workUnit: document.getElementById('nu_unit').value.trim(),
-    position: document.getElementById('nu_pos').value.trim(),
-    email: document.getElementById('nu_email').value.trim(),
-    phone: document.getElementById('nu_phone').value.trim(),
-    role: document.getElementById('nu_role').value,
-    confidentialityDate: document.getElementById('nu_conf').value,
-    mapAuthorized: document.getElementById('nu_map').value === 'true'
-  };
-  const r = await fetch(W+'/admin/users', { method:'POST', headers:H, body:JSON.stringify(body) });
-  if (r.ok) { toast('Usuario creado'); limpiarFormulario(); await loadAll(); showSection('users',document.querySelectorAll('.sidebar a')[1]); }
-  else { const d = await r.json(); toast(d.error || 'Error al crear'); }
+// ===== EDIT USER =====
+function openEdit(username){
+  const u=allUsers.find(x=>x.username===username);if(!u)return;
+  document.getElementById('ed_username').value=u.username;document.getElementById('editTitle').textContent=u.username;
+  document.getElementById('ed_name').value=u.fullName||'';document.getElementById('ed_id').value=u.idNumber||'';
+  document.getElementById('ed_unit').value=u.workUnit||'';document.getElementById('ed_pos').value=u.position||'';
+  document.getElementById('ed_email').value=u.email||'';document.getElementById('ed_phone').value=u.phone||'';
+  document.getElementById('ed_role').value=u.role||'user';document.getElementById('ed_conf').value=u.confidentialityDate||'';
+  document.getElementById('ed_map').value=u.mapAuthorized?'true':'false';document.getElementById('ed_enabled').value=u.enabled?'true':'false';
+  document.getElementById('ed_pass').value='';document.getElementById('editModal').classList.add('show');
 }
-function limpiarFormulario() {
-  ['nu_user','nu_pass','nu_name','nu_id','nu_unit','nu_pos','nu_email','nu_phone','nu_conf'].forEach(id => document.getElementById(id).value = '');
-  document.getElementById('nu_role').value = 'user';
-  document.getElementById('nu_map').value = 'true';
+function closeEdit(){document.getElementById('editModal').classList.remove('show');}
+
+async function saveEdit(){
+  const username=document.getElementById('ed_username').value;
+  const body={fullName:document.getElementById('ed_name').value.trim(),idNumber:document.getElementById('ed_id').value.trim(),workUnit:document.getElementById('ed_unit').value.trim(),position:document.getElementById('ed_pos').value.trim(),email:document.getElementById('ed_email').value.trim(),phone:document.getElementById('ed_phone').value.trim(),role:document.getElementById('ed_role').value,confidentialityDate:document.getElementById('ed_conf').value,mapAuthorized:document.getElementById('ed_map').value==='true',enabled:document.getElementById('ed_enabled').value==='true'};
+  const pw=document.getElementById('ed_pass').value;if(pw.trim())body.password=pw;
+  const r=await fetch(`${W}/admin/users/${encodeURIComponent(username)}`,{method:'PUT',headers:H,body:JSON.stringify(body)});
+  if(r.ok){toast('Usuario actualizado');closeEdit();await loadAll();}
+  else{const d=await r.json();toast(d.error||'Error al actualizar');}
 }
 
-// ============ TOGGLES & DELETE ============
-async function toggleMap(username) {
-  await fetch(`${W}/admin/users/${encodeURIComponent(username)}/toggle-map`, { method:'PATCH', headers:H });
-  await loadAll();
+// ===== CREATE USER =====
+async function crearUsuario(){
+  const u=document.getElementById('nu_user').value.trim();const p=document.getElementById('nu_pass').value;
+  if(!u||!p){toast('Usuario y contraseña son obligatorios');return;}
+  const body={username:u,password:p,fullName:document.getElementById('nu_name').value.trim(),idNumber:document.getElementById('nu_id').value.trim(),workUnit:document.getElementById('nu_unit').value.trim(),position:document.getElementById('nu_pos').value.trim(),email:document.getElementById('nu_email').value.trim(),phone:document.getElementById('nu_phone').value.trim(),role:document.getElementById('nu_role').value,confidentialityDate:document.getElementById('nu_conf').value,mapAuthorized:document.getElementById('nu_map').value==='true'};
+  const r=await fetch(W+'/admin/users',{method:'POST',headers:H,body:JSON.stringify(body)});
+  if(r.ok){toast('Usuario creado');limpiarFormulario();await loadAll();showSection('users',document.querySelectorAll('.sidebar a')[1]);}
+  else{const d=await r.json();toast(d.error||'Error al crear');}
 }
-async function toggleEnabled(username) {
-  await fetch(`${W}/admin/users/${encodeURIComponent(username)}/toggle-enabled`, { method:'PATCH', headers:H });
-  await loadAll();
-}
-async function eliminar(username) {
-  if (!confirm('¿Eliminar usuario "'+username+'"? Esta acción no se puede deshacer.')) return;
-  await fetch(`${W}/admin/users/${encodeURIComponent(username)}`, { method:'DELETE', headers:H });
-  toast('Usuario eliminado');
-  await loadAll();
-}
+function limpiarFormulario(){['nu_user','nu_pass','nu_name','nu_id','nu_unit','nu_pos','nu_email','nu_phone','nu_conf'].forEach(id=>document.getElementById(id).value='');document.getElementById('nu_role').value='user';document.getElementById('nu_map').value='true';}
 
-// ============ LOGS ============
-function renderLogs() {
-  document.getElementById('logTable').innerHTML = allLogs.map(l => `<tr>
-    <td>${l.key.split(':')[0]}</td><td>${l.ip}</td><td>${l.country}</td><td>${l.city}</td>
-    <td>${l.timezone||'—'}</td><td>${l.localTime||'—'}</td><td>${l.ts}</td>
-  </tr>`).join('');
-}
+// ===== TOGGLES & DELETE =====
+async function toggleMap(u){await fetch(`${W}/admin/users/${encodeURIComponent(u)}/toggle-map`,{method:'PATCH',headers:H});await loadAll();}
+async function toggleEnabled(u){await fetch(`${W}/admin/users/${encodeURIComponent(u)}/toggle-enabled`,{method:'PATCH',headers:H});await loadAll();}
+async function eliminar(u){if(!confirm('¿Eliminar usuario "'+u+'"? Esta acción no se puede deshacer.'))return;await fetch(`${W}/admin/users/${encodeURIComponent(u)}`,{method:'DELETE',headers:H});toast('Usuario eliminado');await loadAll();}
 
-// ============ SETTINGS ============
-function renderPalettes() {
-  document.getElementById('paletteGrid').innerHTML = PALETTES.map(p =>
-    `<div class="pal ${p.name===currentTheme?'selected':''}" onclick="selectPalette('${p.name}')">
-      <div class="pal-swatch" style="background:linear-gradient(135deg,${p.sidebar} 35%,${p.primary} 35%,${p.primary} 65%,${p.accent} 65%)"></div>
-      <div>${p.name}</div>
-    </div>`
-  ).join('');
-}
+// ===== SETTINGS =====
+function renderPalettes(){document.getElementById('paletteGrid').innerHTML=PALETTES.map(p=>`<div class="pal ${p.name===currentTheme?'selected':''}" onclick="selectPalette('${p.name}')"><div class="pal-swatch" style="background:linear-gradient(135deg,${p.sidebar} 35%,${p.primary} 35%,${p.primary} 65%,${p.accent} 65%)"></div><div>${p.name}</div></div>`).join('');}
+function selectPalette(name){currentTheme=name;renderPalettes();}
+function applyThemeByName(name){const p=PALETTES.find(x=>x.name===name);if(!p)return;document.documentElement.style.setProperty('--bg',p.bg);document.documentElement.style.setProperty('--sidebar',p.sidebar);document.documentElement.style.setProperty('--topbar',p.sidebar);document.documentElement.style.setProperty('--primary',p.primary);document.documentElement.style.setProperty('--sidebar-active',p.primary);document.querySelector('.sidebar').style.background=p.sidebar;document.querySelector('.topbar').style.background=p.sidebar;document.body.style.background=p.bg;}
+async function saveTheme(){applyThemeByName(currentTheme);await fetch(W+'/admin/config',{method:'POST',headers:H,body:JSON.stringify({theme:currentTheme})});toast('Tema aplicado');}
+async function saveMapUrl(){const val=document.getElementById('cfg_mapUrl').value.trim();if(!val){toast('Ingrese una URL válida');return;}await fetch(W+'/admin/config',{method:'POST',headers:H,body:JSON.stringify({mapUrl:val})});toast('URL del mapa actualizada');}
 
-function selectPalette(name) { currentTheme = name; renderPalettes(); }
-
-function applyThemeByName(name) {
-  const p = PALETTES.find(x => x.name === name);
-  if (!p) return;
-  document.documentElement.style.setProperty('--bg', p.bg);
-  document.documentElement.style.setProperty('--sidebar', p.sidebar);
-  document.documentElement.style.setProperty('--topbar', p.sidebar);
-  document.documentElement.style.setProperty('--primary', p.primary);
-  document.documentElement.style.setProperty('--sidebar-active', p.primary);
-  document.querySelector('.sidebar').style.background = p.sidebar;
-  document.querySelector('.topbar').style.background = p.sidebar;
-  document.body.style.background = p.bg;
-}
-
-async function saveTheme() {
-  applyThemeByName(currentTheme);
-  await fetch(W+'/admin/config', { method:'POST', headers:H, body:JSON.stringify({ theme:currentTheme }) });
-  toast('Tema aplicado');
-}
-async function saveMapUrl() {
-  const val = document.getElementById('cfg_mapUrl').value.trim();
-  if (!val) { toast('Ingrese una URL válida'); return; }
-  await fetch(W+'/admin/config', { method:'POST', headers:H, body:JSON.stringify({ mapUrl:val }) });
-  toast('URL del mapa actualizada');
-}
-
-// ============ UTILS ============
-function esc(s) { return (s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;'); }
-
-document.getElementById('searchUser').addEventListener('input', () => { currentPage = 1; renderUsers(); });
-
-// Initial load
+function esc(s){return(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');}
+document.getElementById('searchUser').addEventListener('input',()=>{currentPage=1;renderUsers();});
 loadAll();
 </script>
 </body>
