@@ -326,7 +326,7 @@ async function loadAll(){
   try{
     const[uRes,lRes,cRes]=await Promise.all([fetch(W+'/admin/users',{headers:H}),fetch(W+'/admin/logs',{headers:H}),fetch(W+'/admin/config',{headers:H})]);
     allUsers=await uRes.json();
-    allLogs=await lRes.json();
+    allLogs = (await lRes.json()).sort((a, b) => (b.ts || '').localeCompare(a.ts || ''));
     filteredLogs=[...allLogs];
     const config=await cRes.json();
     document.getElementById('cfg_mapUrl').value=config.mapUrl||'';
