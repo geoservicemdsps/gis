@@ -87,7 +87,11 @@ document.getElementById('f').onsubmit = async e => {
       method:'POST', headers:{'Content-Type':'application/json'},
       body: JSON.stringify({ username: fd.get('username'), password: fd.get('password') })
     });
-    if (!r.ok) { document.getElementById('msg').textContent = 'Usuario o contraseña incorrectos'; return; }
+    if (!r.ok) {
+      const err = await r.json().catch(() => null);
+      document.getElementById('msg').textContent = err?.error || 'Usuario o contraseña incorrectos';
+      return;
+    }
     const data = await r.json();
     if (!data.acceptedTerms) {
       pendingToken = data.token;
