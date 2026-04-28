@@ -1,1 +1,56 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Ayuda — GeoPortal</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;background:#f0f0f1;color:#1d2327}
+header{background:#1a5c2e;color:#fff;padding:0 1rem;height:48px;display:flex;align-items:center;justify-content:space-between;box-shadow:0 1px 3px rgba(0,0,0,.2)}
+header .left{display:flex;align-items:center;gap:.8rem}
+header .left img.logo{width:32px;height:32px;border-radius:4px;object-fit:contain}
+header h1{font-size:.95rem;font-weight:500}
+.btn-back{background:rgba(255,255,255,.15);color:#fff;border:1px solid rgba(255,255,255,.3);padding:.35rem .8rem;border-radius:3px;cursor:pointer;font-size:.8rem;text-decoration:none;transition:background .2s}
+.btn-back:hover{background:rgba(255,255,255,.25)}
+.content{max-width:800px;margin:2rem auto;padding:0 1.5rem}
+.content h2{color:#1a5c2e;margin-bottom:1rem;font-size:1.3rem}
+.content p{line-height:1.6;margin-bottom:1rem;color:#50575e}
+.card{background:#fff;border:1px solid #c3c4c7;border-radius:6px;padding:1.5rem;margin-bottom:1rem}
+.card h3{color:#2271b1;margin-bottom:.5rem}
+</style>
+</head>
+<body>
+<header>
+  <div class="left">
+    <img class="logo" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAIAAAD8GO2jAAABCGlDQ1BJQ0MgUHJvZmlsZQAAeJxjYGA8wQAELAYMDLl5JUVB7k4KEZFRCuwPGBiBEAwSk4sLGHADoKpv1yBqL+viUYcLcKakFicD6Q9ArFIEtBxopAiQLZIOYWuA2EkQtg2IXV5SUAJkB4DYRSFBzkB2CpCtkY7ETkJiJxcUgdT3ANk2uTmlyQh3M/Ck5oUGA2kOIJZhKGYIYnBncAL5H6IkfxEDg8VXBgbmCQixpJkMDNtbGRgkbiHEVBYwMPC3MDBsO48QQ4RJQWJRIliIBYiZ0tIYGD4tZ2DgjWRgEL7AwMAVDQsIHG5TALvNnSEfCNMZchhSgSKeDHkMyQx6QJYRgwGDIYMZAKbWPz9HbOBQAAAEJ0lEQVR4nO1WbUhbVxi+H0mTKDEfJhq/3YUpLqUKdkUlMqw/w4rUElm1H0aNtFTrzGAua+Jg/TNa2ob1T43t7I9JO1tSy9YSEbpRMJnTOpeoYYRqdyXWIPkw5sbcm3vPflwqI3406qB/+vw773nOec773PO+50LQe7xrwEmRYBhBEAiCGIYBAPz/ApvFwBvsVwCGYQAAiqKVlZUSidjpdC0sLCTM7l0AhmH2vP39fXV1daOjowRB0DQ9MzNrt9snJiZjsdi+MkBRlKZprbb59u3+Cxc6xsbsWm0zDMNcLlckEvH5fJPJ5HS6YBhmGGa7TZBtJxCEYZi8vDyj8ZLNZhsefmy1PszOzvb5fHw+PxDwu91umUz2Vou2FWD9NRh6FAqFwfB1b6/p5cv53t5vJBKx2Wy22UYAYDQaTW5uDgCAvWO7AIqiEATV1NSsra12d39eW1sbja4dPVozOjridE4LBHyWptO1mUzGDf4uwOFwBAL+5cvfer2LnZ0dbvfszZvfNzU1EsRaRUUFy2ltbZmc/MPrXSwrK4UgaBdJsMdpbGxsadFiGGYwfPXkyc+Dgz96vYvXr1+DIIjH41ksfXNzs6WlpW737NOnv3A4HARBYDiJqmJ5KpVKr+++cuW7jXhR0YdqtTo1NVUoFFqtDy2WWx7P30bjJY1GQ9NkW1sblKRRLOnu3QGTyWix9AkEgoRlIpFobm7GbL6h1TZHo2tVVZX37g16vTiGYVsalThms5yamkpPT19fX1er1c+f/zY+7nA4xlyuv86fPxcKhfT6L9rbdX5/wGp91NPz5dWr17jcA11dFyEI2uxS4pi9/iqVSqdrC4VC09PTBEEUFBREIpGsrCwM++DkySaaph88GMrNzT1z5uzExPihQ2UDAz94PJ6Wlla2NncSYK+/WCzq67tltzs6Ozscjt+5XC6Hg4rFYqlUWl39STgcLikpqaqqLC8vp2na5XI1NGhOnz6L4/jmquYkCLBVEwyGKIrCcby9/dzBg8p4PI4gCEmShw+XK5UfjY3Z5+fn9frulZWVWCx27NinDQ2fLS8vb9kzEgU2fBwefmw237h//6f19SiKclAUBQAUFxcXFRXh+OKdO/3Pnv1aWFgolUqPHz8RjUZZb7fYbXMIetNHu7ounjrVxK6kqDhFkQiCDA0NYRj24sWf1dWqeDyu07WzSe/Q7/aInJycZGjbZgAAyMjIOHLk40AgwOUeEInSVldXpVLp69fLS0tLSqUyHqdomlYoFFbro3A4vN3js8U32BDIzMysr6+Xy2WvXv1DkqRcLsPxxZSUFLlcxjAgFAr5/f7s7CybbSQcDu8lA6FQmJ+fHwwG09LShEIhRVE8Hs/n8xEEIZFIxGJxJBJxu90kSSZh1T6wc497+5sMAEjY4r+RJP8t3uNd4l+Tre9btUKkmAAAAABJRU5ErkJggg==" alt="INSEMEP">
+    <h1>Ayuda — GeoPortal</h1>
+  </div>
+  <a class="btn-back" href="map.html">← Volver al Mapa</a>
+</header>
+<div class="content">
+  <h2>Manual de Ayuda del GeoPortal</h2>
+  <p>Esta sección está en desarrollo. Próximamente encontrará aquí las instrucciones detalladas para el uso del sistema de Consulta Geográfica Modernización Delegada.</p>
 
+  <div class="card">
+    <h3>Acceso al Sistema</h3>
+    <p>Para acceder al GeoPortal, ingrese su nombre de usuario y contraseña proporcionados por el administrador del sistema. En su primer inicio de sesión deberá aceptar el Acuerdo de Confidencialidad.</p>
+  </div>
+
+  <div class="card">
+    <h3>Visualización del Mapa</h3>
+    <p>Una vez autenticado, podrá visualizar las capas de información geográfica disponibles. Use el panel lateral izquierdo para activar o desactivar las capas que desea consultar.</p>
+  </div>
+
+  <div class="card">
+    <h3>Cambio de Contraseña</h3>
+    <p>Puede cambiar su contraseña en cualquier momento haciendo clic en su nombre en la esquina superior derecha y seleccionando "Cambiar Contraseña". La nueva contraseña debe tener al menos 10 caracteres e incluir mayúsculas, minúsculas y números.</p>
+  </div>
+
+  <div class="card">
+    <h3>Soporte</h3>
+    <p>Si tiene problemas para acceder o utilizar el sistema, contacte al administrador del GeoPortal.</p>
+  </div>
+</div>
+</body>
+</html>

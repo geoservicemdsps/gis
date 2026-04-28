@@ -11,12 +11,21 @@ header{background:#1a5c2e;color:#fff;padding:0 1rem;height:48px;display:flex;ali
 header .left{display:flex;align-items:center;gap:.8rem}
 header .left img.logo{width:32px;height:32px;border-radius:4px;object-fit:contain}
 header h1{font-size:.95rem;font-weight:500}
-header .right{display:flex;align-items:center;gap:.7rem;font-size:.85rem}
-.user-name{color:rgba(255,255,255,.85)}
+header .right{display:flex;align-items:center;gap:.7rem;font-size:.85rem;position:relative}
+.user-menu{position:relative}
+.user-menu-btn{background:none;border:none;color:#fff;cursor:pointer;font-size:.85rem;display:flex;align-items:center;gap:.4rem;padding:.35rem .6rem;border-radius:4px;transition:background .2s}
+.user-menu-btn:hover{background:rgba(255,255,255,.15)}
+.user-menu-btn .arrow{margin-left:3px;transition:transform .2s}
+.user-menu-btn[aria-expanded="true"] .arrow{transform:rotate(180deg)}
+.user-dropdown{display:none;position:absolute;top:100%;right:0;margin-top:4px;background:#fff;border-radius:6px;box-shadow:0 4px 16px rgba(0,0,0,.2);min-width:200px;overflow:hidden;z-index:999}
+.user-dropdown.show{display:block}
+.user-dropdown a,.user-dropdown button{display:flex;align-items:center;gap:.6rem;width:100%;padding:10px 16px;background:none;border:none;color:#333;font-size:.85rem;cursor:pointer;text-decoration:none;text-align:left;transition:background .15s}
+.user-dropdown a:hover,.user-dropdown button:hover{background:#f5f5f5}
+.user-dropdown .separator{height:1px;background:#e5e5e5;margin:2px 0}
+.user-dropdown .logout{color:#d63638}
+.user-dropdown .logout:hover{background:#fff1f1}
 .btn-header{background:rgba(255,255,255,.15);color:#fff;border:1px solid rgba(255,255,255,.3);padding:.35rem .8rem;border-radius:3px;cursor:pointer;font-size:.8rem;transition:background .2s}
 .btn-header:hover{background:rgba(255,255,255,.25)}
-.btn-logout{background:rgba(220,60,60,.6);border-color:rgba(220,60,60,.4)}
-.btn-logout:hover{background:rgba(220,60,60,.8)}
 .no-access{display:flex;align-items:center;justify-content:center;height:calc(100% - 48px);text-align:center;padding:2rem}
 .no-access div{max-width:400px}
 .no-access h2{color:#d63638;margin-bottom:1rem}
@@ -53,9 +62,18 @@ iframe{width:100%;height:calc(100% - 48px);border:0}
     <h1>Consulta Geográfica Modernización Delegada</h1>
   </div>
   <div class="right">
-    <span class="user-name" id="userName"></span>
-    <button class="btn-header" onclick="openChangePw()">🔑 Cambiar clave</button>
-    <button class="btn-header btn-logout" onclick="sessionStorage.clear();location='index.html'">Cerrar sesión</button>
+    <div class="user-menu">
+      <button class="user-menu-btn" onclick="toggleUserMenu()" aria-expanded="false">
+        <span id="userName"></span>
+        <svg class="arrow" width="10" height="6" viewBox="0 0 10 6" fill="none"><path d="M1 1L5 5L9 1" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </button>
+      <div class="user-dropdown" id="userDropdown">
+        <a href="ayuda.html">📖 Ayuda</a>
+        <button onclick="closeUserMenu();openChangePw()">🔑 Cambiar Contraseña</button>
+        <div class="separator"></div>
+        <button class="logout" onclick="sessionStorage.clear();location='index.html'">🚪 Cerrar Sesión</button>
+      </div>
+    </div>
   </div>
 </header>
 
@@ -106,6 +124,23 @@ const tk = sessionStorage.getItem('tk');
 if (!tk) location.href = 'index.html';
 
 document.getElementById('userName').textContent = sessionStorage.getItem('fullName') || '';
+
+// Menú desplegable del usuario
+function toggleUserMenu() {
+  const dd = document.getElementById('userDropdown');
+  const btn = dd.parentElement.querySelector('.user-menu-btn');
+  dd.classList.toggle('show');
+  btn.setAttribute('aria-expanded', dd.classList.contains('show'));
+}
+function closeUserMenu() {
+  const dd = document.getElementById('userDropdown');
+  const btn = dd.parentElement.querySelector('.user-menu-btn');
+  dd.classList.remove('show');
+  btn.setAttribute('aria-expanded', 'false');
+}
+document.addEventListener('click', e => {
+  if (!e.target.closest('.user-menu')) closeUserMenu();
+});
 
 const mapAuth = sessionStorage.getItem('mapAuth');
 if (mapAuth === 'true' || mapAuth === true) {
