@@ -198,9 +198,19 @@ tr:hover td{background:#f6f7f7}
           <input type="text" id="searchUser" placeholder="Buscar..." style="padding:4px 8px;border:1px solid #ccc;border-radius:3px;font-size:.85rem">
         </div>
         <div class="toolbar no-print">
-          <label>Mostrar: <select id="pageSize" onchange="changePageSize()"><option value="5">5</option><option value="10" selected>10</option><option value="25">25</option><option value="50">50</option><option value="100">100</option></select></label>
+          <label>Mostrar: <select id="pageSize" onchange="changePageSize()"><option value="5">5</option><option value="10" selected>10</option><option value="25">25</option><option value="50">50</option><option value="100">100</option><option value="99999">Todos</option></select></label>
           <button class="btn btn-outline btn-sm" onclick="printUsers()">🖨️ Imprimir</button>
+          <button class="btn btn-success btn-sm" onclick="exportUsersCSV()">📥 Exportar CSV</button>
         </div>
+      </div>
+      <div class="no-print" style="padding:8px 16px;border-bottom:1px solid var(--border);display:flex;gap:8px;flex-wrap:wrap;align-items:center;font-size:.82rem">
+        <span style="color:var(--text-sec);font-weight:600">Filtrar por:</span>
+        <select id="filterUnit" onchange="applyUserFilters()" style="padding:3px 6px;border:1px solid #ccc;border-radius:3px;font-size:.82rem"><option value="">Unidad: Todas</option></select>
+        <select id="filterPosition" onchange="applyUserFilters()" style="padding:3px 6px;border:1px solid #ccc;border-radius:3px;font-size:.82rem"><option value="">Cargo: Todos</option></select>
+        <select id="filterRole" onchange="applyUserFilters()" style="padding:3px 6px;border:1px solid #ccc;border-radius:3px;font-size:.82rem"><option value="">Rol: Todos</option><option value="admin">Admin</option><option value="user">Usuario</option></select>
+        <select id="filterEnabled" onchange="applyUserFilters()" style="padding:3px 6px;border:1px solid #ccc;border-radius:3px;font-size:.82rem"><option value="">Estado: Todos</option><option value="true">Activo</option><option value="false">Inactivo</option></select>
+        <select id="filterMap" onchange="applyUserFilters()" style="padding:3px 6px;border:1px solid #ccc;border-radius:3px;font-size:.82rem"><option value="">Mapa: Todos</option><option value="true">Autorizado</option><option value="false">No autorizado</option></select>
+        <button class="btn btn-outline btn-sm" onclick="clearUserFilters()">Limpiar filtros</button>
       </div>
       <div class="pagination no-print" id="paginationTop" style="padding:8px 16px 0"></div>
       <div class="panel-body">
@@ -290,7 +300,7 @@ tr:hover td{background:#f6f7f7}
 
 </div>
 
-<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.8/dist/chart.umd.min.js" integrity="sha384-T/4KgSWuZEPozpPz7rnnp/5lDSnpY1VPJCojf1S81uTHS1E38qgLfMgVsAeRCWc4" crossorigin="anonymous"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.8/dist/chart.umd.min.js" integrity="sha384-rRoXxn2yHlrZYB587Ki9RO1tONhLdM6XfORg7Rw4uwH4/Fh/5nP7IUX91bkaKUgs" crossorigin="anonymous"></script>
 <script>
 const W = 'https://nextgis-gate.geomdsps.workers.dev';
 const tk = sessionStorage.getItem('tk');
@@ -332,7 +342,7 @@ async function loadAll(){
     document.getElementById('cfg_mapUrl').value=config.mapUrl||'';
     if(config.theme){currentTheme=config.theme;applyThemeByName(config.theme);}
     dataReady=true;
-    renderStats();renderCharts();renderUsers();renderLogs();renderPalettes();
+    renderStats();renderCharts();populateUserFilters();renderUsers();renderLogs();renderPalettes();
   }catch(e){console.error('Error:',e);toast('Error al conectar con el servidor');}
 }
 
@@ -365,7 +375,62 @@ function renderCharts(){
 }
 
 // ===== USERS =====
-function getFilteredUsers(){const f=(document.getElementById('searchUser').value||'').toLowerCase();return f?allUsers.filter(u=>(u.username+u.fullName+u.workUnit+u.email+u.position).toLowerCase().includes(f)):[...allUsers];}
+function getFilteredUsers(){
+  const search=(document.getElementById('searchUser').value||'').toLowerCase();
+  const fUnit=document.getElementById('filterUnit').value;
+  const fPos=document.getElementById('filterPosition').value;
+  const fRole=document.getElementById('filterRole').value;
+  const fEnabled=document.getElementById('filterEnabled').value;
+  const fMap=document.getElementById('filterMap').value;
+  return allUsers.filter(u=>{
+    if(search&&!(u.username+u.fullName+u.workUnit+u.email+u.position).toLowerCase().includes(search))return false;
+    if(fUnit&&u.workUnit!==fUnit)return false;
+    if(fPos&&u.position!==fPos)return false;
+    if(fRole&&u.role!==fRole)return false;
+    if(fEnabled==='true'&&!u.enabled)return false;
+    if(fEnabled==='false'&&u.enabled)return false;
+    if(fMap==='true'&&!u.mapAuthorized)return false;
+    if(fMap==='false'&&u.mapAuthorized)return false;
+    return true;
+  });
+}
+
+function populateUserFilters(){
+  const units=[...new Set(allUsers.map(u=>u.workUnit).filter(Boolean))].sort();
+  const positions=[...new Set(allUsers.map(u=>u.position).filter(Boolean))].sort();
+  const selUnit=document.getElementById('filterUnit');
+  const selPos=document.getElementById('filterPosition');
+  const curUnit=selUnit.value;const curPos=selPos.value;
+  selUnit.innerHTML='<option value="">Unidad: Todas</option>'+units.map(u=>`<option value="${esc(u)}">${esc(u)}</option>`).join('');
+  selPos.innerHTML='<option value="">Cargo: Todos</option>'+positions.map(p=>`<option value="${esc(p)}">${esc(p)}</option>`).join('');
+  selUnit.value=curUnit;selPos.value=curPos;
+}
+
+function applyUserFilters(){currentPage=1;renderUsers();}
+function clearUserFilters(){
+  document.getElementById('searchUser').value='';
+  document.getElementById('filterUnit').value='';
+  document.getElementById('filterPosition').value='';
+  document.getElementById('filterRole').value='';
+  document.getElementById('filterEnabled').value='';
+  document.getElementById('filterMap').value='';
+  currentPage=1;renderUsers();
+}
+
+function exportUsersCSV(){
+  const filtered=getFilteredUsers();
+  const rows=[['Usuario','Nombre Completo','Identificación','Unidad','Cargo','Correo','Teléfono','Rol','Estado','Mapa','Términos','Fecha Acuerdo','Fecha Creación']];
+  filtered.forEach(u=>{
+    rows.push([u.username,u.fullName,u.idNumber||'',u.workUnit,u.position,u.email,u.phone||'',u.role,u.enabled?'Activo':'Inactivo',u.mapAuthorized?'Autorizado':'No autorizado',u.acceptedTerms?'Sí':'No',u.confidentialityDate||'',u.createdAt||'']);
+  });
+  const csv=rows.map(r=>r.map(c=>`"${(c||'').replace(/"/g,'""')}"`).join(',')).join('\n');
+  const blob=new Blob(['\uFEFF'+csv],{type:'text/csv;charset=utf-8;'});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement('a');
+  a.href=url;a.download='usuarios_geoportal.csv';document.body.appendChild(a);a.click();document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+  toast(`CSV exportado: ${filtered.length} usuarios`);
+}
 
 function renderUsers(){
   const filtered=getFilteredUsers();const totalPages=Math.max(1,Math.ceil(filtered.length/pageSize));
