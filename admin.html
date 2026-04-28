@@ -290,7 +290,7 @@ tr:hover td{background:#f6f7f7}
 
 </div>
 
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.8/dist/chart.umd.min.js" integrity="sha384-rRoXxn2yHlrZYB587Ki9RO1tONhLdM6XfORg7Rw4uwH4/Fh/5nP7IUX91bkaKUgs" crossorigin="anonymous"></script>
 <script>
 const W = 'https://nextgis-gate.geomdsps.workers.dev';
 const tk = sessionStorage.getItem('tk');
@@ -342,7 +342,7 @@ function renderStats(){
   document.getElementById('stActive').textContent=allUsers.filter(u=>u.enabled).length;
   document.getElementById('stMap').textContent=allUsers.filter(u=>u.mapAuthorized).length;
   document.getElementById('stLogins').textContent=allLogs.length;
-  document.getElementById('dashLogs').innerHTML=allLogs.slice(0,10).map(l=>`<tr><td>${l.key.split(':')[0]}</td><td>${l.ip}</td><td>${l.country}</td><td>${l.city}</td><td>${l.localTime||l.ts}</td></tr>`).join('');
+  document.getElementById('dashLogs').innerHTML=allLogs.slice(0,10).map(l=>`<tr><td>${esc(l.key.split(':')[0])}</td><td>${esc(l.ip)}</td><td>${esc(l.country)}</td><td>${esc(l.city)}</td><td>${esc(l.localTime||l.ts)}</td></tr>`).join('');
 }
 
 function renderCharts(){
@@ -420,7 +420,7 @@ function renderLogs(){
   const start=(logPage-1)*logPageSize;
   const page=filteredLogs.slice(start,start+logPageSize);
   document.getElementById('logCount').textContent=`(${total} registros)`;
-  document.getElementById('logTable').innerHTML=page.map(l=>`<tr><td>${l.key.split(':')[0]}</td><td>${l.ip}</td><td>${l.country}</td><td>${l.city}</td><td>${l.timezone||'—'}</td><td>${l.localTime||'—'}</td><td>${l.ts}</td></tr>`).join('');
+  document.getElementById('logTable').innerHTML=page.map(l=>`<tr><td>${esc(l.key.split(':')[0])}</td><td>${esc(l.ip)}</td><td>${esc(l.country)}</td><td>${esc(l.city)}</td><td>${esc(l.timezone||'—')}</td><td>${esc(l.localTime||'—')}</td><td>${esc(l.ts)}</td></tr>`).join('');
   const ph=buildPagination(total,totalPages,logPage,'goLogPage');
   document.getElementById('logPaginationTop').innerHTML=ph;
   document.getElementById('logPaginationBottom').innerHTML=ph;
@@ -471,16 +471,24 @@ function closeEdit(){document.getElementById('editModal').classList.remove('show
 async function saveEdit(){
   const username=document.getElementById('ed_username').value;
   const body={fullName:document.getElementById('ed_name').value.trim(),idNumber:document.getElementById('ed_id').value.trim(),workUnit:document.getElementById('ed_unit').value.trim(),position:document.getElementById('ed_pos').value.trim(),email:document.getElementById('ed_email').value.trim(),phone:document.getElementById('ed_phone').value.trim(),role:document.getElementById('ed_role').value,confidentialityDate:document.getElementById('ed_conf').value,mapAuthorized:document.getElementById('ed_map').value==='true',enabled:document.getElementById('ed_enabled').value==='true'};
-  const pw=document.getElementById('ed_pass').value;if(pw.trim())body.password=pw;
+  const pw=document.getElementById('ed_pass').value;if(pw.trim()){const pwErr=validatePw(pw);if(pwErr){toast(pwErr);return;}body.password=pw;}
   const r=await fetch(`${W}/admin/users/${encodeURIComponent(username)}`,{method:'PUT',headers:H,body:JSON.stringify(body)});
   if(r.ok){toast('Usuario actualizado');closeEdit();await loadAll();}
   else{const d=await r.json();toast(d.error||'Error al actualizar');}
 }
 
 // ===== CREATE USER =====
+function validatePw(pw){
+  if(!pw||pw.length<10)return 'La contraseña debe tener al menos 10 caracteres';
+  if(!/[A-Z]/.test(pw))return 'Debe incluir al menos una letra mayúscula';
+  if(!/[a-z]/.test(pw))return 'Debe incluir al menos una letra minúscula';
+  if(!/[0-9]/.test(pw))return 'Debe incluir al menos un número';
+  return null;
+}
 async function crearUsuario(){
   const u=document.getElementById('nu_user').value.trim();const p=document.getElementById('nu_pass').value;
   if(!u||!p){toast('Usuario y contraseña son obligatorios');return;}
+  const pwErr=validatePw(p);if(pwErr){toast(pwErr);return;}
   const body={username:u,password:p,fullName:document.getElementById('nu_name').value.trim(),idNumber:document.getElementById('nu_id').value.trim(),workUnit:document.getElementById('nu_unit').value.trim(),position:document.getElementById('nu_pos').value.trim(),email:document.getElementById('nu_email').value.trim(),phone:document.getElementById('nu_phone').value.trim(),role:document.getElementById('nu_role').value,confidentialityDate:document.getElementById('nu_conf').value,mapAuthorized:document.getElementById('nu_map').value==='true'};
   const r=await fetch(W+'/admin/users',{method:'POST',headers:H,body:JSON.stringify(body)});
   if(r.ok){toast('Usuario creado');limpiarFormulario();await loadAll();showSection('users',document.querySelectorAll('.sidebar a')[1]);}

@@ -22,6 +22,7 @@ header .right{display:flex;align-items:center;gap:.7rem;font-size:.85rem}
 .no-access h2{color:#d63638;margin-bottom:1rem}
 .no-access p{color:#50575e;line-height:1.5}
 iframe{width:100%;height:calc(100% - 48px);border:0}
+.loading{display:flex;align-items:center;justify-content:center;height:calc(100% - 48px);color:#666;font-size:.95rem}
 
 .modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:999;align-items:center;justify-content:center}
 .modal-overlay.show{display:flex}
@@ -35,6 +36,7 @@ iframe{width:100%;height:calc(100% - 48px);border:0}
 .modal-body .field input{width:100%;padding:8px 10px;border:1px solid #c3c4c7;border-radius:4px;font-size:.9rem;color:#1d2327}
 .modal-body .field input:focus{outline:none;border-color:#1a5c2e;box-shadow:0 0 0 1px #1a5c2e}
 .modal-body .hint{font-size:.78rem;color:#888;margin-top:3px}
+.pw-strength{height:4px;border-radius:2px;margin-top:4px;transition:all .3s}
 .modal-foot{padding:12px 20px;border-top:1px solid #e2e4e7;display:flex;gap:8px;justify-content:flex-end;background:#f9f9f9}
 .btn-modal{padding:7px 16px;border:none;border-radius:4px;font-size:.85rem;font-weight:600;cursor:pointer}
 .btn-save{background:#1a5c2e;color:#fff}.btn-save:hover{background:#14472a}
@@ -64,6 +66,7 @@ iframe{width:100%;height:calc(100% - 48px);border:0}
   </div>
 </div>
 
+<div class="loading" id="loadingMsg" style="display:none">Cargando mapa...</div>
 <iframe id="mapFrame" style="display:none"></iframe>
 
 <!-- Modal Cambiar Contraseña -->
@@ -80,8 +83,9 @@ iframe{width:100%;height:calc(100% - 48px);border:0}
       </div>
       <div class="field">
         <label>Nueva contraseña</label>
-        <input type="password" id="pw_new" placeholder="Mínimo 6 caracteres">
-        <div class="hint">Utilice una combinación de letras, números y símbolos.</div>
+        <input type="password" id="pw_new" placeholder="Mínimo 10 caracteres" oninput="checkPwStrength()">
+        <div class="pw-strength" id="pwStrength"></div>
+        <div class="hint">Mínimo 10 caracteres. Debe incluir mayúscula, minúscula y número.</div>
       </div>
       <div class="field">
         <label>Confirmar nueva contraseña</label>
@@ -105,10 +109,56 @@ document.getElementById('userName').textContent = sessionStorage.getItem('fullNa
 
 const mapAuth = sessionStorage.getItem('mapAuth');
 if (mapAuth === 'true' || mapAuth === true) {
-  document.getElementById('mapFrame').style.display = 'block';
-  document.getElementById('mapFrame').src = `${WORKER}/map?t=${tk}`;
+  // ===== FASE 2: W-02 — Usar token efímero para cargar el mapa =====
+  document.getElementById('loadingMsg').style.display = 'flex';
+  loadMapWithEphemeralToken();
 } else {
   document.getElementById('noAccess').style.display = 'flex';
+}
+
+async function loadMapWithEphemeralToken() {
+  try {
+    const r = await fetch(WORKER + '/map-token', {
+      method: 'POST',
+      headers: { 'Authorization': 'Bearer ' + tk, 'Content-Type': 'application/json' }
+    });
+    if (!r.ok) {
+      if (r.status === 401) { sessionStorage.clear(); location.href = 'index.html'; return; }
+      if (r.status === 403) { document.getElementById('loadingMsg').style.display = 'none'; document.getElementById('noAccess').style.display = 'flex'; return; }
+      throw new Error('Error al obtener acceso al mapa');
+    }
+    const data = await r.json();
+    document.getElementById('loadingMsg').style.display = 'none';
+    document.getElementById('mapFrame').style.display = 'block';
+    document.getElementById('mapFrame').src = `${WORKER}/map?t=${data.mapToken}`;
+  } catch (err) {
+    document.getElementById('loadingMsg').textContent = 'Error al cargar el mapa. Intente cerrar sesión e ingresar de nuevo.';
+  }
+}
+
+// ===== FASE 1: M-03 — Validación de contraseña robusta =====
+function validatePassword(pw) {
+  if (!pw || pw.length < 10) return 'La contraseña debe tener al menos 10 caracteres';
+  if (!/[A-Z]/.test(pw)) return 'Debe incluir al menos una letra mayúscula';
+  if (!/[a-z]/.test(pw)) return 'Debe incluir al menos una letra minúscula';
+  if (!/[0-9]/.test(pw)) return 'Debe incluir al menos un número';
+  return null;
+}
+
+function checkPwStrength() {
+  const pw = document.getElementById('pw_new').value;
+  const bar = document.getElementById('pwStrength');
+  let score = 0;
+  if (pw.length >= 10) score++;
+  if (pw.length >= 14) score++;
+  if (/[A-Z]/.test(pw)) score++;
+  if (/[a-z]/.test(pw)) score++;
+  if (/[0-9]/.test(pw)) score++;
+  if (/[^A-Za-z0-9]/.test(pw)) score++;
+  const pct = Math.min(100, (score / 6) * 100);
+  const color = pct < 40 ? '#d63638' : pct < 70 ? '#dba617' : '#00a32a';
+  bar.style.width = pct + '%';
+  bar.style.background = color;
 }
 
 function openChangePw() {
@@ -117,6 +167,7 @@ function openChangePw() {
   document.getElementById('pw_confirm').value = '';
   document.getElementById('pwMsg').textContent = '';
   document.getElementById('pwMsg').className = '';
+  document.getElementById('pwStrength').style.width = '0';
   document.getElementById('pwModal').classList.add('show');
 }
 
@@ -130,30 +181,13 @@ async function submitChangePw() {
   const newPw = document.getElementById('pw_new').value;
   const confirm = document.getElementById('pw_confirm').value;
 
-  if (!current || !newPw || !confirm) {
-    msg.textContent = 'Complete todos los campos';
-    msg.className = 'pw-err';
-    return;
-  }
-  if (newPw.length < 6) {
-    msg.textContent = 'La nueva contraseña debe tener al menos 6 caracteres';
-    msg.className = 'pw-err';
-    return;
-  }
-  if (newPw !== confirm) {
-    msg.textContent = 'Las contraseñas nuevas no coinciden';
-    msg.className = 'pw-err';
-    return;
-  }
-  if (current === newPw) {
-    msg.textContent = 'La nueva contraseña debe ser diferente a la actual';
-    msg.className = 'pw-err';
-    return;
-  }
+  if (!current || !newPw || !confirm) { msg.textContent = 'Complete todos los campos'; msg.className = 'pw-err'; return; }
+  const pwErr = validatePassword(newPw);
+  if (pwErr) { msg.textContent = pwErr; msg.className = 'pw-err'; return; }
+  if (newPw !== confirm) { msg.textContent = 'Las contraseñas nuevas no coinciden'; msg.className = 'pw-err'; return; }
+  if (current === newPw) { msg.textContent = 'La nueva contraseña debe ser diferente a la actual'; msg.className = 'pw-err'; return; }
 
-  msg.textContent = 'Procesando...';
-  msg.className = '';
-
+  msg.textContent = 'Procesando...'; msg.className = '';
   try {
     const r = await fetch(WORKER + '/change-password', {
       method: 'POST',
@@ -172,15 +206,10 @@ async function submitChangePw() {
       msg.textContent = data.error || 'Error al cambiar la contraseña';
       msg.className = 'pw-err';
     }
-  } catch (err) {
-    msg.textContent = 'Error de conexión con el servidor';
-    msg.className = 'pw-err';
-  }
+  } catch (err) { msg.textContent = 'Error de conexión con el servidor'; msg.className = 'pw-err'; }
 }
 
-document.addEventListener('keydown', e => {
-  if (e.key === 'Escape') closePwModal();
-});
+document.addEventListener('keydown', e => { if (e.key === 'Escape') closePwModal(); });
 </script>
 </body>
 </html>
