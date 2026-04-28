@@ -33,6 +33,22 @@ header .right{display:flex;align-items:center;gap:.7rem;font-size:.85rem;positio
 iframe{width:100%;height:calc(100% - 48px);border:0}
 .loading{display:flex;align-items:center;justify-content:center;height:calc(100% - 48px);color:#666;font-size:.95rem}
 
+/* Responsive */
+@media(max-width:600px){
+  header{height:auto;min-height:48px;padding:.5rem .8rem;flex-wrap:wrap;gap:.3rem}
+  header .left{flex:1;min-width:0}
+  header .left img.logo{width:26px;height:26px}
+  header h1{font-size:.78rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  header .right{flex-shrink:0}
+  .user-menu-btn{font-size:.78rem;padding:.25rem .4rem}
+  .user-dropdown{right:-8px;min-width:180px}
+  .user-dropdown a,.user-dropdown button{padding:9px 14px;font-size:.82rem}
+  iframe,.loading,.no-access{height:calc(100vh - 56px)}
+  .modal{width:98%;max-width:none;margin:0 4px}
+  .modal-body{padding:14px}
+  .modal-body .field input{font-size:16px}
+}
+
 .modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:999;align-items:center;justify-content:center}
 .modal-overlay.show{display:flex}
 .modal{background:#fff;border-radius:8px;width:95%;max-width:420px;box-shadow:0 8px 32px rgba(0,0,0,.25);overflow:hidden}
@@ -85,7 +101,7 @@ iframe{width:100%;height:calc(100% - 48px);border:0}
 </div>
 
 <div class="loading" id="loadingMsg" style="display:none">Cargando mapa...</div>
-<iframe id="mapFrame" style="display:none"></iframe>
+<iframe id="mapFrame" allow="geolocation" style="display:none"></iframe>
 
 <!-- Modal Cambiar Contraseña -->
 <div class="modal-overlay" id="pwModal">
