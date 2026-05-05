@@ -35,8 +35,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;b
 .panel{background:var(--card);border:1px solid var(--border);border-radius:4px;margin-bottom:20px}
 .panel-header{padding:10px 16px;border-bottom:1px solid var(--border);font-weight:600;font-size:.9rem;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px}
 .panel-body{padding:16px;overflow-x:auto}
-.chart-container{position:relative;width:100%;min-height:400px}
-.chart-container canvas{width:100%!important;height:100%!important}
+.chart-container{position:relative;width:100%;height:420px}
 
 table{width:100%;border-collapse:collapse;font-size:.85rem}
 th{background:#f6f7f7;text-align:left;padding:8px 10px;border-bottom:2px solid var(--border);font-weight:600;white-space:nowrap}
@@ -363,7 +362,7 @@ function renderCharts(){
   const sorted=Object.entries(lc).sort((a,b)=>b[1]-a[1]).slice(0,20);
   if(chartLogins)chartLogins.destroy();
   chartLogins=new Chart(document.getElementById('chartLogins').getContext('2d'),{
-    type:'bar',data:{labels:sorted.map(e=>e[0]),datasets:[{label:'Inicios de sesión',data:sorted.map(e=>e[1]),backgroundColor:sorted.map((_,i)=>CHART_COLORS[i%CHART_COLORS.length]),borderRadius:4,barPercentage: 0.8, categoryPercentage: 0.9}]},
+    type:'bar',data:{labels:sorted.map(e=>e[0]),datasets:[{label:'Inicios de sesión',data:sorted.map(e=>e[1]),backgroundColor:sorted.map((_,i)=>CHART_COLORS[i%CHART_COLORS.length]),borderRadius:4,barPercentage: 0.7}]},
     options:{responsive:true,maintainAspectRatio:false,indexAxis:'y',plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>`${c.parsed.x} acceso(s)`}}},scales:{x:{beginAtZero:true,ticks:{stepSize:1,font:{size:11}},grid:{color:'#e2e4e7'},title:{display:true,text:'Cantidad de accesos',font:{size:12}}},y:{ticks:{font:{size:11}},grid:{display:false}}}}
   });
   // Chart 2
