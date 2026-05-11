@@ -210,6 +210,7 @@ tr:hover td{background:#f6f7f7}
         <select id="filterRole" onchange="applyUserFilters()" style="padding:3px 6px;border:1px solid #ccc;border-radius:3px;font-size:.82rem"><option value="">Rol: Todos</option><option value="admin">Admin</option><option value="user">Usuario</option></select>
         <select id="filterEnabled" onchange="applyUserFilters()" style="padding:3px 6px;border:1px solid #ccc;border-radius:3px;font-size:.82rem"><option value="">Estado: Todos</option><option value="true">Activo</option><option value="false">Inactivo</option></select>
         <select id="filterMap" onchange="applyUserFilters()" style="padding:3px 6px;border:1px solid #ccc;border-radius:3px;font-size:.82rem"><option value="">Mapa: Todos</option><option value="true">Autorizado</option><option value="false">No autorizado</option></select>
+        <select id="filterTerms" onchange="applyUserFilters()" style="padding:3px 6px;border:1px solid #ccc;border-radius:3px;font-size:.82rem"><option value="">Términos: Todos</option><option value="true">Aceptados</option><option value="false">No aceptados</option></select>
         <button class="btn btn-outline btn-sm" onclick="clearUserFilters()">Limpiar filtros</button>
       </div>
       <div class="pagination no-print" id="paginationTop" style="padding:8px 16px 0"></div>
@@ -262,7 +263,7 @@ tr:hover td{background:#f6f7f7}
           <button class="btn btn-outline btn-sm" onclick="clearLogFilter()">Limpiar filtro</button>
         </div>
         <div class="toolbar no-print">
-          <label>Mostrar: <select id="logPageSize" onchange="changeLogPageSize()"><option value="10">10</option><option value="25" selected>25</option><option value="50">50</option><option value="100">100</option><option value="500">500</option></select></label>
+          <label>Mostrar: <select id="logPageSize" onchange="changeLogPageSize()"><option value="10">10</option><option value="25" selected>25</option><option value="50">50</option><option value="100">100</option><option value="500">500</option><option value="99999">Todos</option></select></label>
           <button class="btn btn-outline btn-sm" onclick="printLogs()">🖨️ Imprimir</button>
           <button class="btn btn-success btn-sm" onclick="exportLogsCSV()">📥 Exportar CSV</button>
         </div>
@@ -391,6 +392,7 @@ function getFilteredUsers(){
   const fRole=document.getElementById('filterRole').value;
   const fEnabled=document.getElementById('filterEnabled').value;
   const fMap=document.getElementById('filterMap').value;
+  const fTerms=document.getElementById('filterTerms').value;
   return allUsers.filter(u=>{
     if(search&&!(u.username+u.fullName+u.workUnit+u.email+u.position).toLowerCase().includes(search))return false;
     if(fUnit&&u.workUnit!==fUnit)return false;
@@ -400,6 +402,8 @@ function getFilteredUsers(){
     if(fEnabled==='false'&&u.enabled)return false;
     if(fMap==='true'&&!u.mapAuthorized)return false;
     if(fMap==='false'&&u.mapAuthorized)return false;
+    if(fTerms==='true'&&!u.acceptedTerms)return false;
+    if(fTerms==='false'&&u.acceptedTerms)return false;
     return true;
   });
 }
@@ -423,6 +427,7 @@ function clearUserFilters(){
   document.getElementById('filterRole').value='';
   document.getElementById('filterEnabled').value='';
   document.getElementById('filterMap').value='';
+  document.getElementById('filterTerms').value='';
   currentPage=1;renderUsers();
 }
  
