@@ -24,8 +24,6 @@ header .right{display:flex;align-items:center;gap:.7rem;font-size:.85rem;positio
 .user-dropdown .separator{height:1px;background:#e5e5e5;margin:2px 0}
 .user-dropdown .logout{color:#d63638}
 .user-dropdown .logout:hover{background:#fff1f1}
-.btn-header{background:rgba(255,255,255,.15);color:#fff;border:1px solid rgba(255,255,255,.3);padding:.35rem .8rem;border-radius:3px;cursor:pointer;font-size:.8rem;transition:background .2s}
-.btn-header:hover{background:rgba(255,255,255,.25)}
 .no-access{display:flex;align-items:center;justify-content:center;height:calc(100% - 48px);text-align:center;padding:2rem}
 .no-access div{max-width:400px}
 .no-access h2{color:#d63638;margin-bottom:1rem}
@@ -33,22 +31,29 @@ header .right{display:flex;align-items:center;gap:.7rem;font-size:.85rem;positio
 iframe{width:100%;height:calc(100% - 48px);border:0}
 .loading{display:flex;align-items:center;justify-content:center;height:calc(100% - 48px);color:#666;font-size:.95rem}
 
+/* Botón flotante de coordenadas */
+.coord-btn{position:fixed;bottom:20px;right:20px;width:48px;height:48px;border-radius:50%;background:#1a5c2e;color:#fff;border:none;box-shadow:0 4px 12px rgba(0,0,0,.3);cursor:pointer;font-size:20px;display:flex;align-items:center;justify-content:center;z-index:800;transition:transform .2s,background .2s}
+.coord-btn:hover{background:#14472a;transform:scale(1.1)}
+
 /* Responsive */
 @media(max-width:600px){
-  header{height:auto;min-height:48px;padding:.5rem .8rem;flex-wrap:wrap;gap:.3rem}
+  header{height:auto;min-height:44px;padding:.4rem .6rem;flex-wrap:wrap;gap:.2rem}
   header .left{flex:1;min-width:0}
-  header .left img.logo{width:26px;height:26px}
-  header h1{font-size:.78rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  header .left img.logo{width:24px;height:24px}
+  header h1{font-size:.72rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
   header .right{flex-shrink:0}
-  .user-menu-btn{font-size:.78rem;padding:.25rem .4rem}
-  .user-dropdown{right:-8px;min-width:180px}
+  .user-menu-btn{font-size:.72rem;padding:.2rem .3rem}
+  .user-dropdown{right:-8px;min-width:170px}
   .user-dropdown a,.user-dropdown button{padding:9px 14px;font-size:.82rem}
-  iframe,.loading,.no-access{height:calc(100vh - 56px)}
-  .modal{width:98%;max-width:none;margin:0 4px}
+  iframe,.loading,.no-access{height:calc(100vh - 44px)}
+  .coord-btn{bottom:12px;right:12px;width:42px;height:42px;font-size:18px}
+  .modal{width:98%!important;max-width:none!important;margin:0 4px}
   .modal-body{padding:14px}
-  .modal-body .field input{font-size:16px}
+  .modal-body .field input,.modal-body .field select{font-size:16px}
+  .coord-row{grid-template-columns:1fr 1fr 1fr 70px;gap:4px}
 }
 
+/* Modals */
 .modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:999;align-items:center;justify-content:center}
 .modal-overlay.show{display:flex}
 .modal{background:#fff;border-radius:8px;width:95%;max-width:420px;box-shadow:0 8px 32px rgba(0,0,0,.25);overflow:hidden}
@@ -66,9 +71,14 @@ iframe{width:100%;height:calc(100% - 48px);border:0}
 .btn-modal{padding:7px 16px;border:none;border-radius:4px;font-size:.85rem;font-weight:600;cursor:pointer}
 .btn-save{background:#1a5c2e;color:#fff}.btn-save:hover{background:#14472a}
 .btn-cancel{background:#e2e4e7;color:#333}.btn-cancel:hover{background:#d0d0d0}
-#pwMsg{font-size:.82rem;margin-top:10px;text-align:center;min-height:1.2em}
-.pw-ok{color:#00a32a}
-.pw-err{color:#d63638}
+#pwMsg,#coordMsg{font-size:.82rem;margin-top:10px;text-align:center;min-height:1.2em}
+.pw-ok,.coord-ok{color:#00a32a}
+.pw-err,.coord-err{color:#d63638}
+.coord-row{display:grid;grid-template-columns:1fr 1fr 1fr 80px;gap:6px;align-items:end}
+.coord-row .field{margin-bottom:0}
+.coord-row .field input{text-align:center}
+.coord-label{font-size:.8rem;font-weight:600;color:#1a5c2e;margin-bottom:8px}
+.coord-preview{font-size:.8rem;color:#666;margin-top:6px;text-align:center;min-height:1.2em}
 </style>
 </head>
 <body>
@@ -86,6 +96,7 @@ iframe{width:100%;height:calc(100% - 48px);border:0}
       <div class="user-dropdown" id="userDropdown">
         <a href="ayuda.html">📖 Ayuda</a>
         <button onclick="closeUserMenu();openChangePw()">🔑 Cambiar Contraseña</button>
+        <button onclick="closeUserMenu();openCoordSearch()">📍 Buscar Coordenadas</button>
         <div class="separator"></div>
         <button class="logout" onclick="sessionStorage.clear();location='index.html'">🚪 Cerrar Sesión</button>
       </div>
@@ -103,6 +114,9 @@ iframe{width:100%;height:calc(100% - 48px);border:0}
 <div class="loading" id="loadingMsg" style="display:none">Cargando mapa...</div>
 <iframe id="mapFrame" allow="geolocation" style="display:none"></iframe>
 
+<!-- Botón flotante de coordenadas -->
+<button class="coord-btn" id="coordFloatBtn" onclick="openCoordSearch()" title="Buscar por coordenadas" style="display:none">📍</button>
+
 <!-- Modal Cambiar Contraseña -->
 <div class="modal-overlay" id="pwModal">
   <div class="modal">
@@ -111,25 +125,61 @@ iframe{width:100%;height:calc(100% - 48px);border:0}
       <button class="close" onclick="closePwModal()">&times;</button>
     </div>
     <div class="modal-body">
-      <div class="field">
-        <label>Contraseña actual</label>
-        <input type="password" id="pw_current" placeholder="Ingrese su contraseña actual">
-      </div>
-      <div class="field">
-        <label>Nueva contraseña</label>
-        <input type="password" id="pw_new" placeholder="Mínimo 10 caracteres" oninput="checkPwStrength()">
-        <div class="pw-strength" id="pwStrength"></div>
-        <div class="hint">Mínimo 10 caracteres. Debe incluir mayúscula, minúscula y número.</div>
-      </div>
-      <div class="field">
-        <label>Confirmar nueva contraseña</label>
-        <input type="password" id="pw_confirm" placeholder="Repita la nueva contraseña">
-      </div>
+      <div class="field"><label>Contraseña actual</label><input type="password" id="pw_current" placeholder="Ingrese su contraseña actual"></div>
+      <div class="field"><label>Nueva contraseña</label><input type="password" id="pw_new" placeholder="Mínimo 10 caracteres" oninput="checkPwStrength()"><div class="pw-strength" id="pwStrength"></div><div class="hint">Mínimo 10 caracteres. Debe incluir mayúscula, minúscula y número.</div></div>
+      <div class="field"><label>Confirmar nueva contraseña</label><input type="password" id="pw_confirm" placeholder="Repita la nueva contraseña"></div>
       <p id="pwMsg"></p>
     </div>
     <div class="modal-foot">
       <button class="btn-modal btn-cancel" onclick="closePwModal()">Cancelar</button>
       <button class="btn-modal btn-save" onclick="submitChangePw()">Guardar</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal Buscar Coordenadas -->
+<div class="modal-overlay" id="coordModal">
+  <div class="modal" style="max-width:440px">
+    <div class="modal-head">
+      <span>📍 Buscar por Coordenadas</span>
+      <button class="close" onclick="closeCoordModal()">&times;</button>
+    </div>
+    <div class="modal-body">
+      <div class="coord-label">Latitud (N/S)</div>
+      <div class="coord-row">
+        <div class="field"><label>Grados</label><input type="number" id="lat_deg" min="0" max="90" placeholder="15"></div>
+        <div class="field"><label>Minutos</label><input type="number" id="lat_min" min="0" max="59" placeholder="30"></div>
+        <div class="field"><label>Segundos</label><input type="number" id="lat_sec" step="0.01" min="0" max="59.99" placeholder="21.5"></div>
+        <div class="field"><label>Hem.</label>
+          <select id="lat_hem" style="width:100%;padding:8px 4px;border:1px solid #c3c4c7;border-radius:4px;font-size:.9rem"><option value="N">N</option><option value="S">S</option></select>
+        </div>
+      </div>
+      <div style="height:14px"></div>
+      <div class="coord-label">Longitud (E/W)</div>
+      <div class="coord-row">
+        <div class="field"><label>Grados</label><input type="number" id="lon_deg" min="0" max="180" placeholder="88"></div>
+        <div class="field"><label>Minutos</label><input type="number" id="lon_min" min="0" max="59" placeholder="01"></div>
+        <div class="field"><label>Segundos</label><input type="number" id="lon_sec" step="0.01" min="0" max="59.99" placeholder="33.0"></div>
+        <div class="field"><label>Hem.</label>
+          <select id="lon_hem" style="width:100%;padding:8px 4px;border:1px solid #c3c4c7;border-radius:4px;font-size:.9rem"><option value="W">W</option><option value="E">E</option></select>
+        </div>
+      </div>
+      <div class="coord-preview" id="coordPreview"></div>
+      <div class="field" style="margin-top:10px">
+        <label>Nivel de Zoom</label>
+        <select id="coord_zoom" style="width:100%;padding:8px;border:1px solid #c3c4c7;border-radius:4px;font-size:.9rem">
+          <option value="12">Ciudad / Zona amplia</option>
+          <option value="14">Colonia / Barrio</option>
+          <option value="16" selected>Calle / Manzana</option>
+          <option value="18">Edificio / Lote</option>
+          <option value="20">Detalle máximo</option>
+        </select>
+      </div>
+      <p id="coordMsg"></p>
+    </div>
+    <div class="modal-foot">
+      <button class="btn-modal btn-cancel" onclick="closeCoordModal()">Cancelar</button>
+      <button class="btn-modal btn-save" onclick="goToCoordinates()">Ir a ubicación</button>
     </div>
   </div>
 </div>
@@ -141,33 +191,20 @@ if (!tk) location.href = 'index.html';
 
 document.getElementById('userName').textContent = sessionStorage.getItem('fullName') || '';
 
-// Menú desplegable del usuario
-function toggleUserMenu() {
-  const dd = document.getElementById('userDropdown');
-  const btn = dd.parentElement.querySelector('.user-menu-btn');
-  dd.classList.toggle('show');
-  btn.setAttribute('aria-expanded', dd.classList.contains('show'));
-}
-function closeUserMenu() {
-  const dd = document.getElementById('userDropdown');
-  const btn = dd.parentElement.querySelector('.user-menu-btn');
-  dd.classList.remove('show');
-  btn.setAttribute('aria-expanded', 'false');
-}
-document.addEventListener('click', e => {
-  if (!e.target.closest('.user-menu')) closeUserMenu();
-});
+// Menú desplegable
+function toggleUserMenu(){const dd=document.getElementById('userDropdown'),btn=dd.parentElement.querySelector('.user-menu-btn');dd.classList.toggle('show');btn.setAttribute('aria-expanded',dd.classList.contains('show'));}
+function closeUserMenu(){const dd=document.getElementById('userDropdown'),btn=dd.parentElement.querySelector('.user-menu-btn');dd.classList.remove('show');btn.setAttribute('aria-expanded','false');}
+document.addEventListener('click',e=>{if(!e.target.closest('.user-menu'))closeUserMenu();});
 
 const mapAuth = sessionStorage.getItem('mapAuth');
 if (mapAuth === 'true' || mapAuth === true) {
-  // ===== FASE 2: W-02 — Usar token efímero para cargar el mapa =====
   document.getElementById('loadingMsg').style.display = 'flex';
   loadMapWithEphemeralToken();
 } else {
   document.getElementById('noAccess').style.display = 'flex';
 }
 
-async function loadMapWithEphemeralToken() {
+async function loadMapWithEphemeralToken(extraParams) {
   try {
     const r = await fetch(WORKER + '/map-token', {
       method: 'POST',
@@ -175,92 +212,92 @@ async function loadMapWithEphemeralToken() {
     });
     if (!r.ok) {
       if (r.status === 401) { sessionStorage.clear(); location.href = 'index.html'; return; }
-      if (r.status === 403) { document.getElementById('loadingMsg').style.display = 'none'; document.getElementById('noAccess').style.display = 'flex'; return; }
+      if (r.status === 403) { document.getElementById('loadingMsg').style.display='none'; document.getElementById('noAccess').style.display='flex'; return; }
       throw new Error('Error al obtener acceso al mapa');
     }
     const data = await r.json();
     document.getElementById('loadingMsg').style.display = 'none';
-    document.getElementById('mapFrame').style.display = 'block';
-    document.getElementById('mapFrame').src = `${WORKER}/map?t=${data.mapToken}`;
+    const frame = document.getElementById('mapFrame');
+    frame.style.display = 'block';
+    frame.src = `${WORKER}/map?t=${data.mapToken}${extraParams || ''}`;
+    document.getElementById('coordFloatBtn').style.display = 'flex';
   } catch (err) {
     document.getElementById('loadingMsg').textContent = 'Error al cargar el mapa. Intente cerrar sesión e ingresar de nuevo.';
   }
 }
 
-// ===== FASE 1: M-03 — Validación de contraseña robusta =====
-function validatePassword(pw) {
-  if (!pw || pw.length < 10) return 'La contraseña debe tener al menos 10 caracteres';
-  if (!/[A-Z]/.test(pw)) return 'Debe incluir al menos una letra mayúscula';
-  if (!/[a-z]/.test(pw)) return 'Debe incluir al menos una letra minúscula';
-  if (!/[0-9]/.test(pw)) return 'Debe incluir al menos un número';
-  return null;
+// ===== BÚSQUEDA POR COORDENADAS (DMS sexagesimales) =====
+function dmsToDecimal(deg, min, sec, hem) {
+  let d = parseFloat(deg) + parseFloat(min)/60 + parseFloat(sec)/3600;
+  if (hem === 'S' || hem === 'W') d = -d;
+  return d;
 }
 
-function checkPwStrength() {
-  const pw = document.getElementById('pw_new').value;
-  const bar = document.getElementById('pwStrength');
-  let score = 0;
-  if (pw.length >= 10) score++;
-  if (pw.length >= 14) score++;
-  if (/[A-Z]/.test(pw)) score++;
-  if (/[a-z]/.test(pw)) score++;
-  if (/[0-9]/.test(pw)) score++;
-  if (/[^A-Za-z0-9]/.test(pw)) score++;
-  const pct = Math.min(100, (score / 6) * 100);
-  const color = pct < 40 ? '#d63638' : pct < 70 ? '#dba617' : '#00a32a';
-  bar.style.width = pct + '%';
-  bar.style.background = color;
+function updateCoordPreview() {
+  const latD=document.getElementById('lat_deg').value, latM=document.getElementById('lat_min').value||0, latS=document.getElementById('lat_sec').value||0, latH=document.getElementById('lat_hem').value;
+  const lonD=document.getElementById('lon_deg').value, lonM=document.getElementById('lon_min').value||0, lonS=document.getElementById('lon_sec').value||0, lonH=document.getElementById('lon_hem').value;
+  if (latD || lonD) {
+    document.getElementById('coordPreview').textContent = `Decimal: ${dmsToDecimal(latD||0,latM,latS,latH).toFixed(6)}, ${dmsToDecimal(lonD||0,lonM,lonS,lonH).toFixed(6)}`;
+  } else {
+    document.getElementById('coordPreview').textContent = '';
+  }
 }
 
-function openChangePw() {
-  document.getElementById('pw_current').value = '';
-  document.getElementById('pw_new').value = '';
-  document.getElementById('pw_confirm').value = '';
-  document.getElementById('pwMsg').textContent = '';
-  document.getElementById('pwMsg').className = '';
-  document.getElementById('pwStrength').style.width = '0';
-  document.getElementById('pwModal').classList.add('show');
+function openCoordSearch() {
+  ['lat_deg','lat_min','lat_sec','lon_deg','lon_min','lon_sec'].forEach(id=>document.getElementById(id).value='');
+  document.getElementById('lat_hem').value='N'; document.getElementById('lon_hem').value='W';
+  document.getElementById('coord_zoom').value='16';
+  document.getElementById('coordMsg').textContent=''; document.getElementById('coordMsg').className='';
+  document.getElementById('coordPreview').textContent='';
+  document.getElementById('coordModal').classList.add('show');
+}
+function closeCoordModal(){document.getElementById('coordModal').classList.remove('show');}
+
+async function goToCoordinates() {
+  const msg = document.getElementById('coordMsg');
+  const latD=parseFloat(document.getElementById('lat_deg').value), latM=parseFloat(document.getElementById('lat_min').value)||0, latS=parseFloat(document.getElementById('lat_sec').value)||0, latH=document.getElementById('lat_hem').value;
+  const lonD=parseFloat(document.getElementById('lon_deg').value), lonM=parseFloat(document.getElementById('lon_min').value)||0, lonS=parseFloat(document.getElementById('lon_sec').value)||0, lonH=document.getElementById('lon_hem').value;
+  const zoom = document.getElementById('coord_zoom').value;
+  if (isNaN(latD)||isNaN(lonD)){msg.textContent='Ingrese al menos los grados de latitud y longitud';msg.className='coord-err';return;}
+  if (latD<0||latD>90){msg.textContent='Latitud debe estar entre 0° y 90°';msg.className='coord-err';return;}
+  if (lonD<0||lonD>180){msg.textContent='Longitud debe estar entre 0° y 180°';msg.className='coord-err';return;}
+  const lat = dmsToDecimal(latD,latM,latS,latH);
+  const lon = dmsToDecimal(lonD,lonM,lonS,lonH);
+  closeCoordModal();
+  document.getElementById('loadingMsg').textContent='Navegando a coordenadas...';
+  document.getElementById('loadingMsg').style.display='flex';
+  document.getElementById('mapFrame').style.display='none';
+  await loadMapWithEphemeralToken(`&lon=${lon}&lat=${lat}&zoom=${zoom}`);
 }
 
-function closePwModal() {
-  document.getElementById('pwModal').classList.remove('show');
+// Preview en tiempo real
+['lat_deg','lat_min','lat_sec','lon_deg','lon_min','lon_sec','lat_hem','lon_hem'].forEach(id=>{
+  document.getElementById(id).addEventListener('input', updateCoordPreview);
+  document.getElementById(id).addEventListener('change', updateCoordPreview);
+});
+
+// ===== CAMBIO DE CONTRASEÑA =====
+function validatePassword(pw){if(!pw||pw.length<10)return'La contraseña debe tener al menos 10 caracteres';if(!/[A-Z]/.test(pw))return'Debe incluir al menos una letra mayúscula';if(!/[a-z]/.test(pw))return'Debe incluir al menos una letra minúscula';if(!/[0-9]/.test(pw))return'Debe incluir al menos un número';return null;}
+function checkPwStrength(){const pw=document.getElementById('pw_new').value;const bar=document.getElementById('pwStrength');let s=0;if(pw.length>=10)s++;if(pw.length>=14)s++;if(/[A-Z]/.test(pw))s++;if(/[a-z]/.test(pw))s++;if(/[0-9]/.test(pw))s++;if(/[^A-Za-z0-9]/.test(pw))s++;const p=Math.min(100,(s/6)*100);bar.style.width=p+'%';bar.style.background=p<40?'#d63638':p<70?'#dba617':'#00a32a';}
+function openChangePw(){['pw_current','pw_new','pw_confirm'].forEach(id=>document.getElementById(id).value='');document.getElementById('pwMsg').textContent='';document.getElementById('pwMsg').className='';document.getElementById('pwStrength').style.width='0';document.getElementById('pwModal').classList.add('show');}
+function closePwModal(){document.getElementById('pwModal').classList.remove('show');}
+
+async function submitChangePw(){
+  const msg=document.getElementById('pwMsg'),cur=document.getElementById('pw_current').value,np=document.getElementById('pw_new').value,cf=document.getElementById('pw_confirm').value;
+  if(!cur||!np||!cf){msg.textContent='Complete todos los campos';msg.className='pw-err';return;}
+  const pe=validatePassword(np);if(pe){msg.textContent=pe;msg.className='pw-err';return;}
+  if(np!==cf){msg.textContent='Las contraseñas nuevas no coinciden';msg.className='pw-err';return;}
+  if(cur===np){msg.textContent='La nueva contraseña debe ser diferente a la actual';msg.className='pw-err';return;}
+  msg.textContent='Procesando...';msg.className='';
+  try{
+    const r=await fetch(WORKER+'/change-password',{method:'POST',headers:{'Authorization':'Bearer '+tk,'Content-Type':'application/json'},body:JSON.stringify({currentPassword:cur,newPassword:np})});
+    const d=await r.json();
+    if(r.ok){msg.textContent='Contraseña actualizada. Use la nueva clave en su próximo inicio de sesión.';msg.className='pw-ok';['pw_current','pw_new','pw_confirm'].forEach(id=>document.getElementById(id).value='');setTimeout(()=>closePwModal(),3000);}
+    else{msg.textContent=d.error||'Error al cambiar la contraseña';msg.className='pw-err';}
+  }catch(e){msg.textContent='Error de conexión con el servidor';msg.className='pw-err';}
 }
 
-async function submitChangePw() {
-  const msg = document.getElementById('pwMsg');
-  const current = document.getElementById('pw_current').value;
-  const newPw = document.getElementById('pw_new').value;
-  const confirm = document.getElementById('pw_confirm').value;
-
-  if (!current || !newPw || !confirm) { msg.textContent = 'Complete todos los campos'; msg.className = 'pw-err'; return; }
-  const pwErr = validatePassword(newPw);
-  if (pwErr) { msg.textContent = pwErr; msg.className = 'pw-err'; return; }
-  if (newPw !== confirm) { msg.textContent = 'Las contraseñas nuevas no coinciden'; msg.className = 'pw-err'; return; }
-  if (current === newPw) { msg.textContent = 'La nueva contraseña debe ser diferente a la actual'; msg.className = 'pw-err'; return; }
-
-  msg.textContent = 'Procesando...'; msg.className = '';
-  try {
-    const r = await fetch(WORKER + '/change-password', {
-      method: 'POST',
-      headers: { 'Authorization': 'Bearer ' + tk, 'Content-Type': 'application/json' },
-      body: JSON.stringify({ currentPassword: current, newPassword: newPw })
-    });
-    const data = await r.json();
-    if (r.ok) {
-      msg.textContent = 'Contraseña actualizada. Use la nueva clave en su próximo inicio de sesión.';
-      msg.className = 'pw-ok';
-      document.getElementById('pw_current').value = '';
-      document.getElementById('pw_new').value = '';
-      document.getElementById('pw_confirm').value = '';
-      setTimeout(() => closePwModal(), 3000);
-    } else {
-      msg.textContent = data.error || 'Error al cambiar la contraseña';
-      msg.className = 'pw-err';
-    }
-  } catch (err) { msg.textContent = 'Error de conexión con el servidor'; msg.className = 'pw-err'; }
-}
-
-document.addEventListener('keydown', e => { if (e.key === 'Escape') closePwModal(); });
+document.addEventListener('keydown',e=>{if(e.key==='Escape'){closePwModal();closeCoordModal();}});
 </script>
 </body>
 </html>
