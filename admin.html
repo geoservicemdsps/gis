@@ -8,10 +8,10 @@
 :root{--sidebar:#1d2327;--sidebar-hover:#2c3338;--sidebar-active:#2271b1;--topbar:#1d2327;--bg:#f0f0f1;--card:#fff;--primary:#2271b1;--primary-hover:#135e96;--text:#1d2327;--text-sec:#50575e;--border:#c3c4c7;--success:#00a32a;--error:#d63638;--warning:#dba617}
 *{box-sizing:border-box;margin:0;padding:0}
 body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;background:var(--bg);color:var(--text);font-size:14px}
-
+ 
 .topbar{position:fixed;top:0;left:0;right:0;height:32px;background:var(--topbar);z-index:100;display:flex;align-items:center;justify-content:space-between;padding:0 1rem;font-size:13px;color:#c3c4c7}
 .topbar a{color:#c3c4c7;text-decoration:none;cursor:pointer}.topbar a:hover{color:#72aee6}
-
+ 
 .sidebar{position:fixed;top:32px;left:0;bottom:0;width:160px;background:var(--sidebar);overflow-y:auto;z-index:90}
 .sidebar .brand{padding:12px 12px 8px;color:#fff;font-size:15px;font-weight:700;border-bottom:1px solid #3c434a}
 .sidebar ul{list-style:none}
@@ -19,68 +19,68 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;b
 .sidebar li a:hover{background:var(--sidebar-hover);color:#fff}
 .sidebar li a.active{background:var(--sidebar-active);color:#fff}
 .sidebar li a .ico{width:20px;text-align:center;font-size:15px}
-
+ 
 .main{margin-left:160px;margin-top:32px;padding:20px}
 .page-title{font-size:1.3rem;font-weight:400;margin-bottom:16px;color:var(--text)}
 .page-title span{font-weight:300;font-size:.9rem;color:var(--text-sec)}
-
+ 
 .stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px;margin-bottom:20px}
 .stat{background:var(--card);border:1px solid var(--border);border-radius:4px;padding:16px;text-align:center}
 .stat .num{font-size:1.8rem;font-weight:600;color:var(--primary)}
 .stat .lbl{font-size:.8rem;color:var(--text-sec);margin-top:4px}
-
+ 
 .charts-row{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:20px}
 @media(max-width:900px){.charts-row{grid-template-columns:1fr}}
-
+ 
 .panel{background:var(--card);border:1px solid var(--border);border-radius:4px;margin-bottom:20px}
 .panel-header{padding:10px 16px;border-bottom:1px solid var(--border);font-weight:600;font-size:.9rem;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px}
 .panel-body{padding:16px;overflow-x:auto}
 .chart-container{position:relative;width:100%;height:420px}
-
+ 
 table{width:100%;border-collapse:collapse;font-size:.85rem}
 th{background:#f6f7f7;text-align:left;padding:8px 10px;border-bottom:2px solid var(--border);font-weight:600;white-space:nowrap}
 td{padding:7px 10px;border-bottom:1px solid #e2e4e7;vertical-align:middle}
 tr:hover td{background:#f6f7f7}
-
+ 
 .form-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
 .field{display:flex;flex-direction:column;gap:3px}
 .field label{font-size:.8rem;font-weight:600;color:var(--text-sec)}
 .field input,.field select{padding:6px 8px;border:1px solid var(--border);border-radius:3px;font-size:.9rem}
 .field input:focus,.field select:focus{outline:none;border-color:var(--primary);box-shadow:0 0 0 1px var(--primary)}
 .field-full{grid-column:1/-1}
-
+ 
 .btn{padding:6px 14px;border:none;border-radius:3px;font-size:.85rem;font-weight:600;cursor:pointer;transition:background .15s}
 .btn-primary{background:var(--primary);color:#fff}.btn-primary:hover{background:var(--primary-hover)}
 .btn-danger{background:var(--error);color:#fff}.btn-danger:hover{background:#b32d2f}
 .btn-success{background:var(--success);color:#fff}.btn-success:hover{background:#007a1e}
 .btn-sm{padding:3px 8px;font-size:.78rem}
 .btn-outline{background:#fff;color:var(--text);border:1px solid var(--border)}.btn-outline:hover{background:#f6f7f7}
-
+ 
 .toggle{position:relative;width:40px;height:22px;cursor:pointer;display:inline-block;vertical-align:middle}
 .toggle input{display:none}
 .toggle .slider{position:absolute;inset:0;background:#d63638;border-radius:22px;transition:.25s}
 .toggle input:checked+.slider{background:#00a32a}
 .toggle .slider::before{content:'';position:absolute;width:18px;height:18px;border-radius:50%;background:#fff;top:2px;left:2px;transition:.25s;box-shadow:0 1px 3px rgba(0,0,0,.2)}
 .toggle input:checked+.slider::before{left:20px}
-
+ 
 .section{display:none}.section.active{display:block}
-
+ 
 .toast{position:fixed;top:40px;right:16px;background:#333;color:#fff;padding:10px 16px;border-radius:4px;font-size:.85rem;z-index:200;display:none}
 .toast.show{display:block}
-
+ 
 .pagination{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;font-size:.85rem}
 .pagination .pages{display:flex;gap:4px}
 .pagination .pages button{width:32px;height:30px;border:1px solid var(--border);border-radius:3px;background:#fff;cursor:pointer;font-size:.82rem;color:var(--text)}
 .pagination .pages button.active{background:var(--primary);color:#fff;border-color:var(--primary)}
 .pagination .pages button:hover:not(.active){background:#f6f7f7}
 .pagination .info{color:var(--text-sec)}
-
+ 
 .palettes{display:grid;grid-template-columns:repeat(auto-fill,minmax(90px,1fr));gap:8px;margin-top:12px}
 .pal{border:2px solid transparent;border-radius:6px;padding:6px;cursor:pointer;text-align:center;font-size:.7rem;transition:border .15s}
 .pal:hover{border-color:var(--primary)}
 .pal.selected{border-color:var(--primary);box-shadow:0 0 0 2px rgba(34,113,177,.3)}
 .pal-swatch{height:28px;border-radius:3px;margin-bottom:3px}
-
+ 
 .modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:300;align-items:center;justify-content:center}
 .modal-overlay.show{display:flex}
 .modal{background:#fff;border-radius:8px;width:95%;max-width:600px;max-height:90vh;display:flex;flex-direction:column;box-shadow:0 8px 32px rgba(0,0,0,.25)}
@@ -88,14 +88,14 @@ tr:hover td{background:#f6f7f7}
 .modal-head .close{background:none;border:none;font-size:1.4rem;cursor:pointer;color:#999;line-height:1}
 .modal-body{padding:20px;overflow-y:auto}
 .modal-foot{padding:12px 20px;border-top:1px solid #ddd;display:flex;gap:8px;justify-content:flex-end}
-
+ 
 .actions-cell{display:flex;gap:4px;flex-wrap:nowrap}
-
+ 
 .toolbar{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
 .toolbar label{font-size:.8rem;font-weight:400;color:var(--text-sec)}
 .toolbar input[type="date"]{padding:3px 6px;border:1px solid #ccc;border-radius:3px;font-size:.82rem}
 .toolbar select{padding:3px 6px;border:1px solid #ccc;border-radius:3px;font-size:.82rem}
-
+ 
 @media print{
   .topbar,.sidebar,.no-print{display:none!important}
   .main{margin-left:0!important;margin-top:0!important;padding:10px!important}
@@ -108,7 +108,7 @@ tr:hover td{background:#f6f7f7}
 </style>
 </head>
 <body>
-
+ 
 <div class="topbar">
   <div>GeoPortal Admin</div>
   <div>
@@ -116,7 +116,7 @@ tr:hover td{background:#f6f7f7}
     <a onclick="sessionStorage.clear();location='index.html'">Cerrar sesión</a>
   </div>
 </div>
-
+ 
 <nav class="sidebar">
   <div class="brand">GeoPortal</div>
   <ul>
@@ -128,9 +128,9 @@ tr:hover td{background:#f6f7f7}
     <li><a href="map.html"><span class="ico">🗺️</span><span>Ver Mapa</span></a></li>
   </ul>
 </nav>
-
+ 
 <div class="toast" id="toast"></div>
-
+ 
 <!-- EDIT USER MODAL -->
 <div class="modal-overlay" id="editModal">
   <div class="modal">
@@ -160,9 +160,9 @@ tr:hover td{background:#f6f7f7}
     </div>
   </div>
 </div>
-
+ 
 <div class="main">
-
+ 
   <!-- DASHBOARD -->
   <div class="section active" id="sec-dashboard">
     <h1 class="page-title">Dashboard</h1>
@@ -187,7 +187,7 @@ tr:hover td{background:#f6f7f7}
       <div class="panel-body"><table><thead><tr><th>Usuario</th><th>IP</th><th>País</th><th>Ciudad</th><th>Fecha/Hora Local</th></tr></thead><tbody id="dashLogs"></tbody></table></div>
     </div>
   </div>
-
+ 
   <!-- USERS LIST -->
   <div class="section" id="sec-users">
     <h1 class="page-title">Usuarios <span id="userCount"></span></h1>
@@ -221,7 +221,7 @@ tr:hover td{background:#f6f7f7}
       <div class="pagination no-print" id="paginationBottom" style="padding:0 16px 12px"></div>
     </div>
   </div>
-
+ 
   <!-- NEW USER -->
   <div class="section" id="sec-newuser">
     <h1 class="page-title">Crear Nuevo Usuario</h1>
@@ -248,7 +248,7 @@ tr:hover td{background:#f6f7f7}
       </div>
     </div>
   </div>
-
+ 
   <!-- LOGS -->
   <div class="section" id="sec-logs">
     <h1 class="page-title">Registro de Accesos <span id="logCount"></span></h1>
@@ -274,7 +274,7 @@ tr:hover td{background:#f6f7f7}
       <div class="pagination no-print" id="logPaginationBottom" style="padding:0 16px 12px"></div>
     </div>
   </div>
-
+ 
   <!-- SETTINGS -->
   <div class="section" id="sec-settings">
     <h1 class="page-title">Ajustes del Sistema</h1>
@@ -289,6 +289,14 @@ tr:hover td{background:#f6f7f7}
       </div>
     </div>
     <div class="panel">
+      <div class="panel-header">Cache del Sistema</div>
+      <div class="panel-body">
+        <p style="font-size:.85rem;color:var(--text-sec);margin-bottom:8px">Versión actual del cache: <strong id="cacheVersionLabel">—</strong></p>
+        <p style="font-size:.82rem;color:var(--text-sec);margin-bottom:12px">El cache se renueva automáticamente cada domingo a las 2:00 AM. Use el botón para forzar una renovación inmediata cuando actualice capas GIS.</p>
+        <button class="btn btn-danger" onclick="purgeCache()">🗑️ Limpiar Cache Ahora</button>
+      </div>
+    </div>
+    <div class="panel">
       <div class="panel-header">Tema de Color de la Interfaz</div>
       <div class="panel-body">
         <p style="font-size:.85rem;color:var(--text-sec);margin-bottom:8px">Seleccione una combinación de colores. Los fondos son siempre claros para mejor legibilidad.</p>
@@ -297,27 +305,27 @@ tr:hover td{background:#f6f7f7}
       </div>
     </div>
   </div>
-
+ 
 </div>
-
+ 
 <script src="chart.min.js"></script>
 <script>
 const W = 'https://nextgis-gate.geomdsps.workers.dev';
 const tk = sessionStorage.getItem('tk');
 if (!tk || sessionStorage.getItem('role') !== 'admin') location.href = 'index.html';
 const H = { 'Authorization':'Bearer '+tk, 'Content-Type':'application/json' };
-
+ 
 document.getElementById('adminName').textContent = sessionStorage.getItem('fullName') || 'Admin';
-
+ 
 const PALETTES=[{name:'WP Clásico',bg:'#f0f0f1',sidebar:'#1d2327',primary:'#2271b1',accent:'#d63638'},{name:'Océano',bg:'#eef4f8',sidebar:'#1b3a4b',primary:'#006d77',accent:'#e29578'},{name:'Bosque',bg:'#f0f4ef',sidebar:'#2d3a2e',primary:'#386641',accent:'#a7c957'},{name:'Lavanda',bg:'#f5f0fa',sidebar:'#2e1a47',primary:'#7b2cbf',accent:'#c77dff'},{name:'Coral',bg:'#fef0ed',sidebar:'#3d1e1e',primary:'#d62828',accent:'#f77f00'},{name:'Cielo',bg:'#edf5fc',sidebar:'#1a365d',primary:'#2b6cb0',accent:'#63b3ed'},{name:'Arena',bg:'#faf5ef',sidebar:'#44403c',primary:'#92400e',accent:'#d97706'},{name:'Menta',bg:'#effaf6',sidebar:'#1a3a2a',primary:'#059669',accent:'#34d399'},{name:'Rosa',bg:'#fdf0f5',sidebar:'#3d1a2e',primary:'#be185d',accent:'#f472b6'},{name:'Pizarra',bg:'#f1f5f9',sidebar:'#1e293b',primary:'#475569',accent:'#94a3b8'},{name:'Ámbar',bg:'#fefce8',sidebar:'#3f3811',primary:'#a16207',accent:'#facc15'},{name:'Índigo',bg:'#eef2ff',sidebar:'#1e1b4b',primary:'#4338ca',accent:'#818cf8'},{name:'Terracota',bg:'#fef2f0',sidebar:'#431407',primary:'#c2410c',accent:'#fb923c'},{name:'Jade',bg:'#ecfdf5',sidebar:'#064e3b',primary:'#047857',accent:'#6ee7b7'},{name:'Ciruela',bg:'#faf5ff',sidebar:'#3b0764',primary:'#7e22ce',accent:'#c084fc'},{name:'Carbón',bg:'#f4f4f5',sidebar:'#27272a',primary:'#52525b',accent:'#a1a1aa'},{name:'Tomate',bg:'#fff1f2',sidebar:'#4c0519',primary:'#e11d48',accent:'#fb7185'},{name:'Turquesa',bg:'#f0fdfa',sidebar:'#134e4a',primary:'#0d9488',accent:'#5eead4'},{name:'Granate',bg:'#fdf2f8',sidebar:'#500724',primary:'#9d174d',accent:'#f9a8d4'},{name:'Oliva',bg:'#f7fee7',sidebar:'#1a2e05',primary:'#4d7c0f',accent:'#a3e635'},{name:'Zafiro',bg:'#eff6ff',sidebar:'#1e3a5f',primary:'#1d4ed8',accent:'#60a5fa'},{name:'Cobre',bg:'#fdf4ef',sidebar:'#451a03',primary:'#b45309',accent:'#fbbf24'},{name:'Neón Suave',bg:'#f0fdf4',sidebar:'#14532d',primary:'#15803d',accent:'#4ade80'},{name:'Noche Azul',bg:'#f0f4ff',sidebar:'#0f172a',primary:'#3b82f6',accent:'#93c5fd'},{name:'Melocotón',bg:'#fff7ed',sidebar:'#431407',primary:'#ea580c',accent:'#fdba74'},{name:'Violeta',bg:'#f5f3ff',sidebar:'#2e1065',primary:'#6d28d9',accent:'#a78bfa'},{name:'Esmeralda',bg:'#ecfdf5',sidebar:'#022c22',primary:'#059669',accent:'#a7f3d0'},{name:'Arcilla',bg:'#faf5f0',sidebar:'#292524',primary:'#78716c',accent:'#d6d3d1'},{name:'Amanecer',bg:'#fff8f1',sidebar:'#3c1810',primary:'#c2410c',accent:'#fcd34d'},{name:'Glaciar',bg:'#f0f9ff',sidebar:'#0c4a6e',primary:'#0284c7',accent:'#7dd3fc'}];
 const CHART_COLORS=['#2271b1','#00a32a','#d63638','#dba617','#3858e9','#059669','#7b2cbf','#ea580c','#0d9488','#be185d','#4d7c0f','#b45309','#6d28d9','#0284c7','#9d174d','#386641','#d62828','#006d77','#4338ca','#c2410c'];
-
+ 
 let allUsers=[],allLogs=[],filteredLogs=[],currentTheme='WP Clásico';
 let currentPage=1,pageSize=10;
 let logPage=1,logPageSize=25;
 let chartLogins=null,chartUnits=null;
 let dataReady=false;
-
+ 
 function showSection(id,el){
   document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));
   document.getElementById('sec-'+id).classList.add('active');
@@ -329,9 +337,9 @@ function showSection(id,el){
     if(id==='logs')renderLogs();
   }
 }
-
+ 
 function toast(msg,dur=2500){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),dur);}
-
+ 
 async function loadAll(){
   try{
     const[uRes,lRes,cRes]=await Promise.all([fetch(W+'/admin/users',{headers:H}),fetch(W+'/admin/logs',{headers:H}),fetch(W+'/admin/config',{headers:H})]);
@@ -340,12 +348,13 @@ async function loadAll(){
     filteredLogs=[...allLogs];
     const config=await cRes.json();
     document.getElementById('cfg_mapUrl').value=config.mapUrl||'';
+    if(config.cacheVersion) document.getElementById('cacheVersionLabel').textContent=config.cacheVersion;
     if(config.theme){currentTheme=config.theme;applyThemeByName(config.theme);}
     dataReady=true;
     renderStats();renderCharts();populateUserFilters();renderUsers();renderLogs();renderPalettes();
   }catch(e){console.error('Error:',e);toast('Error al conectar con el servidor');}
 }
-
+ 
 // ===== DASHBOARD =====
 function renderStats(){
   document.getElementById('stTotal').textContent=allUsers.length;
@@ -354,7 +363,7 @@ function renderStats(){
   document.getElementById('stLogins').textContent=allLogs.length;
   document.getElementById('dashLogs').innerHTML=allLogs.slice(0,10).map(l=>`<tr><td>${esc(l.key.split(':')[0])}</td><td>${esc(l.ip)}</td><td>${esc(l.country)}</td><td>${esc(l.city)}</td><td>${esc(l.localTime||l.ts)}</td></tr>`).join('');
 }
-
+ 
 function renderCharts(){
   if(typeof Chart==='undefined')return;
   // Chart 1
@@ -373,7 +382,7 @@ function renderCharts(){
     options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'bottom',labels:{padding:12,font:{size:11},usePointStyle:true,pointStyle:'circle'}},tooltip:{callbacks:{label:c=>` ${c.label}: ${c.parsed} usuario(s)`}}}}
   });
 }
-
+ 
 // ===== USERS =====
 function getFilteredUsers(){
   const search=(document.getElementById('searchUser').value||'').toLowerCase();
@@ -394,7 +403,7 @@ function getFilteredUsers(){
     return true;
   });
 }
-
+ 
 function populateUserFilters(){
   const units=[...new Set(allUsers.map(u=>u.workUnit).filter(Boolean))].sort();
   const positions=[...new Set(allUsers.map(u=>u.position).filter(Boolean))].sort();
@@ -405,7 +414,7 @@ function populateUserFilters(){
   selPos.innerHTML='<option value="">Cargo: Todos</option>'+positions.map(p=>`<option value="${esc(p)}">${esc(p)}</option>`).join('');
   selUnit.value=curUnit;selPos.value=curPos;
 }
-
+ 
 function applyUserFilters(){currentPage=1;renderUsers();}
 function clearUserFilters(){
   document.getElementById('searchUser').value='';
@@ -416,7 +425,7 @@ function clearUserFilters(){
   document.getElementById('filterMap').value='';
   currentPage=1;renderUsers();
 }
-
+ 
 function exportUsersCSV(){
   const filtered=getFilteredUsers();
   const rows=[['Usuario','Nombre Completo','Identificación','Unidad','Cargo','Correo','Teléfono','Rol','Estado','Mapa','Términos','Fecha Acuerdo','Fecha Creación']];
@@ -431,7 +440,7 @@ function exportUsersCSV(){
   URL.revokeObjectURL(url);
   toast(`CSV exportado: ${filtered.length} usuarios`);
 }
-
+ 
 function renderUsers(){
   const filtered=getFilteredUsers();const totalPages=Math.max(1,Math.ceil(filtered.length/pageSize));
   if(currentPage>totalPages)currentPage=totalPages;
@@ -441,7 +450,7 @@ function renderUsers(){
   const ph=buildPagination(filtered.length,totalPages,currentPage,'goPage');
   document.getElementById('paginationTop').innerHTML=ph;document.getElementById('paginationBottom').innerHTML=ph;
 }
-
+ 
 function buildPagination(total,totalPages,curPage,fnName){
   if(totalPages<=1)return`<span class="info">Mostrando ${total} registro(s)</span>`;
   const s=(curPage-1)*(fnName==='goPage'?pageSize:logPageSize)+1;const e=Math.min(curPage*(fnName==='goPage'?pageSize:logPageSize),total);
@@ -451,11 +460,11 @@ function buildPagination(total,totalPages,curPage,fnName){
   p+=`<button ${curPage===totalPages?'disabled':''} onclick="${fnName}(${curPage+1})">›</button>`;
   return`<span class="info">Mostrando ${s}–${e} de ${total}</span><div class="pages">${p}</div>`;
 }
-
+ 
 function goPage(p){currentPage=p;renderUsers();}
 function changePageSize(){pageSize=parseInt(document.getElementById('pageSize').value);currentPage=1;renderUsers();}
 function printUsers(){showSection('users',document.querySelectorAll('.sidebar a')[1]);const os=pageSize,op=currentPage;pageSize=9999;currentPage=1;renderUsers();setTimeout(()=>{window.print();pageSize=os;currentPage=op;renderUsers();},200);}
-
+ 
 // ===== LOGS =====
 function filterLogs(){
   const from=document.getElementById('logDateFrom').value;
@@ -469,7 +478,7 @@ function filterLogs(){
   logPage=1;
   renderLogs();
 }
-
+ 
 function clearLogFilter(){
   document.getElementById('logDateFrom').value='';
   document.getElementById('logDateTo').value='';
@@ -477,7 +486,7 @@ function clearLogFilter(){
   logPage=1;
   renderLogs();
 }
-
+ 
 function renderLogs(){
   const total=filteredLogs.length;
   const totalPages=Math.max(1,Math.ceil(total/logPageSize));
@@ -490,16 +499,16 @@ function renderLogs(){
   document.getElementById('logPaginationTop').innerHTML=ph;
   document.getElementById('logPaginationBottom').innerHTML=ph;
 }
-
+ 
 function goLogPage(p){logPage=p;renderLogs();}
 function changeLogPageSize(){logPageSize=parseInt(document.getElementById('logPageSize').value);logPage=1;renderLogs();}
-
+ 
 function printLogs(){
   showSection('logs',document.querySelectorAll('.sidebar a')[3]);
   const os=logPageSize,op=logPage;logPageSize=9999;logPage=1;renderLogs();
   setTimeout(()=>{window.print();logPageSize=os;logPage=op;renderLogs();},200);
 }
-
+ 
 function exportLogsCSV(){
   const rows=[['Usuario','IP','País','Ciudad','Zona Horaria','Fecha/Hora Local','Fecha UTC']];
   filteredLogs.forEach(l=>{
@@ -519,7 +528,7 @@ function exportLogsCSV(){
   URL.revokeObjectURL(url);
   toast(`CSV exportado: ${filteredLogs.length} registros`);
 }
-
+ 
 // ===== EDIT USER =====
 function openEdit(username){
   const u=allUsers.find(x=>x.username===username);if(!u)return;
@@ -532,7 +541,7 @@ function openEdit(username){
   document.getElementById('ed_pass').value='';document.getElementById('editModal').classList.add('show');
 }
 function closeEdit(){document.getElementById('editModal').classList.remove('show');}
-
+ 
 async function saveEdit(){
   const username=document.getElementById('ed_username').value;
   const body={fullName:document.getElementById('ed_name').value.trim(),idNumber:document.getElementById('ed_id').value.trim(),workUnit:document.getElementById('ed_unit').value.trim(),position:document.getElementById('ed_pos').value.trim(),email:document.getElementById('ed_email').value.trim(),phone:document.getElementById('ed_phone').value.trim(),role:document.getElementById('ed_role').value,confidentialityDate:document.getElementById('ed_conf').value,mapAuthorized:document.getElementById('ed_map').value==='true',enabled:document.getElementById('ed_enabled').value==='true'};
@@ -541,7 +550,7 @@ async function saveEdit(){
   if(r.ok){toast('Usuario actualizado');closeEdit();await loadAll();}
   else{const d=await r.json();toast(d.error||'Error al actualizar');}
 }
-
+ 
 // ===== CREATE USER =====
 function validatePw(pw){
   if(!pw||pw.length<10)return 'La contraseña debe tener al menos 10 caracteres';
@@ -560,19 +569,26 @@ async function crearUsuario(){
   else{const d=await r.json();toast(d.error||'Error al crear');}
 }
 function limpiarFormulario(){['nu_user','nu_pass','nu_name','nu_id','nu_unit','nu_pos','nu_email','nu_phone','nu_conf'].forEach(id=>document.getElementById(id).value='');document.getElementById('nu_role').value='user';document.getElementById('nu_map').value='true';}
-
+ 
 // ===== TOGGLES & DELETE =====
 async function toggleMap(u){await fetch(`${W}/admin/users/${encodeURIComponent(u)}/toggle-map`,{method:'PATCH',headers:H});await loadAll();}
 async function toggleEnabled(u){await fetch(`${W}/admin/users/${encodeURIComponent(u)}/toggle-enabled`,{method:'PATCH',headers:H});await loadAll();}
 async function eliminar(u){if(!confirm('¿Eliminar usuario "'+u+'"? Esta acción no se puede deshacer.'))return;await fetch(`${W}/admin/users/${encodeURIComponent(u)}`,{method:'DELETE',headers:H});toast('Usuario eliminado');await loadAll();}
-
+ 
 // ===== SETTINGS =====
 function renderPalettes(){document.getElementById('paletteGrid').innerHTML=PALETTES.map(p=>`<div class="pal ${p.name===currentTheme?'selected':''}" onclick="selectPalette('${p.name}')"><div class="pal-swatch" style="background:linear-gradient(135deg,${p.sidebar} 35%,${p.primary} 35%,${p.primary} 65%,${p.accent} 65%)"></div><div>${p.name}</div></div>`).join('');}
 function selectPalette(name){currentTheme=name;renderPalettes();}
 function applyThemeByName(name){const p=PALETTES.find(x=>x.name===name);if(!p)return;document.documentElement.style.setProperty('--bg',p.bg);document.documentElement.style.setProperty('--sidebar',p.sidebar);document.documentElement.style.setProperty('--topbar',p.sidebar);document.documentElement.style.setProperty('--primary',p.primary);document.documentElement.style.setProperty('--sidebar-active',p.primary);document.querySelector('.sidebar').style.background=p.sidebar;document.querySelector('.topbar').style.background=p.sidebar;document.body.style.background=p.bg;}
 async function saveTheme(){applyThemeByName(currentTheme);await fetch(W+'/admin/config',{method:'POST',headers:H,body:JSON.stringify({theme:currentTheme})});toast('Tema aplicado');}
 async function saveMapUrl(){const val=document.getElementById('cfg_mapUrl').value.trim();if(!val){toast('Ingrese una URL válida');return;}await fetch(W+'/admin/config',{method:'POST',headers:H,body:JSON.stringify({mapUrl:val})});toast('URL del mapa actualizada');}
-
+ 
+async function purgeCache(){
+  if(!confirm('¿Limpiar cache del sistema? Los tiles se recargarán desde NextGIS en las próximas consultas.'))return;
+  const r=await fetch(W+'/admin/cache-purge',{method:'POST',headers:H});
+  if(r.ok){const d=await r.json();document.getElementById('cacheVersionLabel').textContent=d.cacheVersion;toast('Cache limpiado: '+d.cacheVersion);}
+  else toast('Error al limpiar cache');
+}
+ 
 function esc(s){return(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');}
 document.getElementById('searchUser').addEventListener('input',()=>{currentPage=1;renderUsers();});
 loadAll();
