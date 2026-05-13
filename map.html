@@ -38,8 +38,15 @@ iframe{width:100%;height:calc(100% - 48px);border:0}
 .coord-btn{position:fixed;bottom:20px;right:20px;width:44px;height:44px;border-radius:50%;background:#1a5c2e;color:#fff;border:none;box-shadow:0 4px 12px rgba(0,0,0,.3);cursor:pointer;display:flex;align-items:center;justify-content:center;z-index:800;transition:transform .2s,background .2s}
 .coord-btn:hover{background:#14472a;transform:scale(1.1)}
 
+/* Barra móvil de navegación del mapa */
+.mobile-map-bar{display:none;position:fixed;bottom:0;left:0;right:0;height:50px;background:#1a5c2e;z-index:900;justify-content:space-around;align-items:center;box-shadow:0 -2px 8px rgba(0,0,0,.3);padding-bottom:env(safe-area-inset-bottom,0px)}
+.mobile-map-bar button{background:none;border:none;color:#fff;display:flex;flex-direction:column;align-items:center;gap:2px;cursor:pointer;padding:4px 12px;border-radius:6px;transition:background .2s}
+.mobile-map-bar button svg{width:24px;height:24px}
+.mobile-map-bar button span{font-size:9px;font-weight:500;letter-spacing:.3px}
+.mobile-map-bar button:hover,.mobile-map-bar button.active{background:rgba(255,255,255,.2)}
+
 /* Responsive */
-@media(max-width:600px){
+@media(max-width:768px){
   header{height:auto;min-height:44px;padding:.4rem .6rem;flex-wrap:wrap;gap:.2rem}
   header .left{flex:1;min-width:0}
   header .left img.logo{width:24px;height:24px}
@@ -48,7 +55,8 @@ iframe{width:100%;height:calc(100% - 48px);border:0}
   .user-menu-btn{font-size:.72rem;padding:.2rem .3rem}
   .user-dropdown{right:-8px;min-width:170px}
   .user-dropdown a,.user-dropdown button{padding:9px 14px;font-size:.82rem}
-  iframe,.loading,.no-access{height:calc(100dvh - 44px);height:calc(100vh - 44px)}
+  .mobile-map-bar{display:flex}
+  iframe,.loading,.no-access{height:calc(100dvh - 94px);height:calc(100vh - 94px)}
   .coord-btn{bottom:60px;right:12px;width:42px;height:42px}
   .modal{width:98%!important;max-width:none!important;margin:0 4px}
   .modal-body{padding:14px}
@@ -119,6 +127,22 @@ iframe{width:100%;height:calc(100% - 48px);border:0}
 
 <!-- Botón flotante de coordenadas -->
 <button class="coord-btn" id="coordFloatBtn" onclick="openCoordSearch()" title="Buscar por coordenadas" style="display:none"><svg width="22" height="22" viewBox="0 0 24 24" fill="none"><circle cx="11" cy="11" r="7" stroke="#fff" stroke-width="2"/><path d="M16.5 16.5L21 21" stroke="#fff" stroke-width="2" stroke-linecap="round"/><path d="M8 11h6M11 8v6" stroke="#fff" stroke-width="1.5" stroke-linecap="round"/></svg></button>
+
+<!-- Barra móvil de navegación del mapa -->
+<div class="mobile-map-bar" id="mobileMapBar">
+  <button onclick="sendMapCmd('Layers')" id="mbtn-layers">
+    <svg viewBox="0 0 24 24" fill="none"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    <span>Layers</span>
+  </button>
+  <button onclick="sendMapCmd('Identify')" id="mbtn-identify">
+    <svg viewBox="0 0 24 24" fill="none"><path d="M3 3l7.07 16.97 2.51-7.39 7.39-2.51L3 3z" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M13 13l6 6" stroke="#fff" stroke-width="2" stroke-linecap="round"/></svg>
+    <span>Identify</span>
+  </button>
+  <button onclick="sendMapCmd('Search')" id="mbtn-search">
+    <svg viewBox="0 0 24 24" fill="none"><circle cx="11" cy="11" r="7" stroke="#fff" stroke-width="2"/><path d="M16.5 16.5L21 21" stroke="#fff" stroke-width="2" stroke-linecap="round"/></svg>
+    <span>Search</span>
+  </button>
+</div>
 
 <!-- Modal Cambiar Contraseña -->
 <div class="modal-overlay" id="pwModal">
@@ -198,6 +222,17 @@ document.getElementById('userName').textContent = sessionStorage.getItem('fullNa
 function toggleUserMenu(){const dd=document.getElementById('userDropdown'),btn=dd.parentElement.querySelector('.user-menu-btn');dd.classList.toggle('show');btn.setAttribute('aria-expanded',dd.classList.contains('show'));}
 function closeUserMenu(){const dd=document.getElementById('userDropdown'),btn=dd.parentElement.querySelector('.user-menu-btn');dd.classList.remove('show');btn.setAttribute('aria-expanded','false');}
 document.addEventListener('click',e=>{if(!e.target.closest('.user-menu'))closeUserMenu();});
+
+// Barra móvil — enviar comando al iframe vía postMessage
+function sendMapCmd(title){
+  const frame=document.getElementById('mapFrame');
+  if(frame&&frame.contentWindow){
+    frame.contentWindow.postMessage({action:'clickMenu',title:title},'*');
+  }
+  document.querySelectorAll('.mobile-map-bar button').forEach(b=>b.classList.remove('active'));
+  const btn=document.getElementById('mbtn-'+title.toLowerCase());
+  if(btn) btn.classList.add('active');
+}
 
 const mapAuth = sessionStorage.getItem('mapAuth');
 if (mapAuth === 'true' || mapAuth === true) {
