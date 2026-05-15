@@ -593,13 +593,19 @@ async function saveMapUrl(){const val=document.getElementById('cfg_mapUrl').valu
 async function purgeCache(){
   if(!confirm('¿Limpiar cache del sistema? Los tiles se recargarán desde NextGIS en las próximas consultas.'))return;
   const r=await fetch(W+'/admin/cache-purge',{method:'POST',headers:H});
-  if(r.ok){const d=await r.json();document.getElementById('cacheVersionLabel').textContent=d.cacheVersion;toast('Cache limpiado: '+d.cacheVersion);}
+  if(r.ok){
+    const d=await r.json();document.getElementById('cacheVersionLabel').textContent=d.cacheVersion;
+    // Purgar también el cache del Service Worker
+    if(navigator.serviceWorker&&navigator.serviceWorker.controller){navigator.serviceWorker.controller.postMessage('PURGE_CACHE');}
+    toast('Cache limpiado: '+d.cacheVersion);
+  }
   else toast('Error al limpiar cache');
 }
  
 function esc(s){return(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');}
 document.getElementById('searchUser').addEventListener('input',()=>{currentPage=1;renderUsers();});
 loadAll();
+if('serviceWorker' in navigator){navigator.serviceWorker.register('sw.js').catch(()=>{});}
 </script>
 </body>
 </html>

@@ -134,6 +134,9 @@ function completeLogin(data) {
   sessionStorage.setItem('mapAuth', data.mapAuthorized);
   location.href = data.role === 'admin' ? 'admin.html' : 'map.html';
 }
+
+// Registrar Service Worker para cache de tiles
+if('serviceWorker' in navigator){navigator.serviceWorker.register('sw.js').catch(()=>{});}
 </script>
 </body>
 </html>
